@@ -40,7 +40,8 @@ $table                = [
     '`f22` Datetime64(3),',
     '`f23` IPv4,',
     '`f24` Nullable(IPv4),',
-    '`f25` IPv6',
+    '`f25` IPv6,',
+    '`f26` LowCardinality(String)',
     ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
@@ -72,7 +73,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f22' => '2020-09-05 14:25:12.258',
         'f23' => '192.168.1.1',
         'f24' => null,
-        'f25' => 'CDCD:910A:2222:5498:8475:1111:3900:2020'
+        'f25' => 'CDCD:910A:2222:5498:8475:1111:3900:2020',
+        'f26' => 'eee'
     ],
     [
         'id'  => 2,
@@ -100,7 +102,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f22' => '2020-09-06 14:25:12.258',
         'f23' => '251.222.221.231',
         'f24' => '192.168.1.2',
-        'f25' => '1030::C9B4:FF12:48AA:1A2B'
+        'f25' => '1030::C9B4:FF12:48AA:1A2B',
+        'f26' => 'eee22'
     ],
     [
         'id'  => 3,
@@ -128,7 +131,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f22' => '2020-09-07 14:25:12.258',
         'f23' => '192.168.1.1',
         'f24' => null,
-        'f25' => '2001:DB8:2de::e13'
+        'f25' => '2001:DB8:2de::e13',
+        'f26' => 'eee22'
     ]
 ]);
 

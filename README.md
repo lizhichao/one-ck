@@ -18,7 +18,6 @@
 - [x] IPv4
 - [x] IPv6
 - [ ] Enum
-- [ ] LowCardinality
 - [ ] Array(T)
 - [ ] Tuple(T)
 
