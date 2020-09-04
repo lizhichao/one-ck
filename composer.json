@@ -1,0 +1,26 @@
+{
+  "name": "lizhichao/one-ck",
+  "type": "library",
+  "description": "clickhouse tcp client",
+  "keywords": [
+    "php",
+    "tcp",
+    "client",
+    "clickhouse"
+  ],
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "tanszhe",
+      "email": "1018595261@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "OneCk\\": "src/"
+    }
+  }
+}
