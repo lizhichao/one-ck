@@ -1,5 +1,9 @@
 ## php tcp client for clickhouse
 
+### install
+
+`composer require lizhichao/one-ck`
+
 ### Supported types 
 - [x] UInt8, UInt16, UInt32, UInt64, Int8, Int16, Int32, Int64
 - [x] Float32, Float64

@@ -145,6 +145,7 @@ class Client
                     break;
                 case Protocol::SERVER_TOTALS:
                 case Protocol::SERVER_EXTREMES:
+                    throw new CkException('Report to me this error ' . $code, 10005);
                     break;
                 case Protocol::SERVER_PONG:
                     $this->read->flush();
