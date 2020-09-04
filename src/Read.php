@@ -64,6 +64,13 @@ class Read
         $this->i   = 0;
     }
 
+    public function clear()
+    {
+        $this->buf = '';
+        $this->len = 0;
+        $this->i   = 0;
+    }
+
     /**
      * @return int
      * @throws CkException
@@ -82,7 +89,7 @@ class Read
         }
     }
 
-    public  function echo_str()
+    public function echo_str()
     {
         $s = $this->buf;
         echo "--- start ---\n";

@@ -247,7 +247,7 @@ class Client
             'version'       => $this->read->number(),
         ];
         $this->_server_info['time_zone'] = $this->gtV(self::DBMS_MIN_V_SERVER_TIMEZONE) ? $this->read->string() : '';
-        $this->read->flush();
+        $this->read->clear();
     }
 
 

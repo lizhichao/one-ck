@@ -26,17 +26,18 @@
 ```php
 use OneCk\Client;
 use OneCk\Types;
-
 //default
 //$ck = new Client('tcp://127.0.0.1:9000', 'default', '', 'default');
 
+$t1 = microtime(true);
 $ck = new Client('tcp://192.168.31.216:9091', 'default', '123456', 'test1');
+
 
 $data['server info'] = $ck->getServerInfo();
 
 $data['drop table'] = $ck->query('DROP TABLE IF EXISTS t6');
 
-$table = [
+$table                = [
     'CREATE TABLE t6 (',
     '`id` UInt32,',
     '`f1` Int32,',
@@ -63,23 +64,24 @@ $table = [
     '`f22` Datetime64(3),',
     '`f23` IPv4,',
     '`f24` Nullable(IPv4),',
-    '`f25` IPv6',
+    '`f25` IPv6,',
+    '`f26` LowCardinality(String)',
     ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
 
 $data['insert data'] = $ck->insert('t6', [
     [
-        'id' => 1,
-        'f1' => -3,
-        'f2' => null,
-        'f3' => 127,
-        'f4' => null,
-        'f5' => 3322,
-        'f6' => 1844674407370955161,
-        'f7' => 9223372036854775807,
-        'f8' => -2132121.5,
-        'f9' => 6546546544665.66658,
+        'id'  => 1,
+        'f1'  => -3,
+        'f2'  => null,
+        'f3'  => 127,
+        'f4'  => null,
+        'f5'  => 3322,
+        'f6'  => 1844674407370955161,
+        'f7'  => 9223372036854775807,
+        'f8'  => -2132121.5,
+        'f9'  => 6546546544665.66658,
         'f10' => null,
         'f11' => 552.339,
         'f12' => 3658.6954,
@@ -95,7 +97,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f22' => '2020-09-05 14:25:12.258',
         'f23' => '192.168.1.1',
         'f24' => null,
-        'f25' => 'CDCD:910A:2222:5498:8475:1111:3900:2020'
+        'f25' => 'CDCD:910A:2222:5498:8475:1111:3900:2020',
+        'f26' => 'eee'
     ],
     [
         'id'  => 2,
@@ -111,31 +114,32 @@ $data['insert data'] = $ck->insert('t6', [
         'f10' => 3,
         'f11' => -552.339,
         'f12' => -3658.6954,
-        'f13' => 3,
+        'f13' => '-170141183460469231168730371588.4105721',
         'f14' => 3,
         'f15' => 'aaa',
         'f16' => 'aaa',
         'f17' => md5('55'),
-        'f18' => '5bfe7b44-da92-4207-8bfb-8d359b61849c',
+        'f18' => md5('55'),
         'f19' => '2020-09-06',
         'f20' => '2020-09-06',
         'f21' => '2020-09-06 14:25:12',
         'f22' => '2020-09-06 14:25:12.258',
         'f23' => '251.222.221.231',
         'f24' => '192.168.1.2',
-        'f25' => '1030::C9B4:FF12:48AA:1A2B'
+        'f25' => '1030::C9B4:FF12:48AA:1A2B',
+        'f26' => 'eee22'
     ],
     [
-        'id' => 3,
-        'f1' => -1,
-        'f2' => 3,
-        'f3' => 3,
-        'f4' => 3,
-        'f5' => 3,
-        'f6' => 3,
-        'f7' => 3,
-        'f8' => 3,
-        'f9' => 3,
+        'id'  => 3,
+        'f1'  => -1,
+        'f2'  => 3,
+        'f3'  => 3,
+        'f4'  => 3,
+        'f5'  => 3,
+        'f6'  => 3,
+        'f7'  => 3,
+        'f8'  => 3,
+        'f9'  => 3,
         'f10' => 3,
         'f11' => 3,
         'f12' => 3,
@@ -151,53 +155,70 @@ $data['insert data'] = $ck->insert('t6', [
         'f22' => '2020-09-07 14:25:12.258',
         'f23' => '192.168.1.1',
         'f24' => null,
-        'f25' => '2001:DB8:2de::e13'
+        'f25' => '2001:DB8:2de::e13',
+        'f26' => 'eee22'
     ]
 ]);
 
 
-$data['struct'] = $ck->query('desc t6');
+//$data['struct'] = $ck->query('desc t6');
+
 $data['select t6'] = $ck->query('select * from t6');
+
+
 $data['select t6 int64'] = $ck->query("select id,f6 from t6 where f6=1844674407370955161");
+
 $data['select t6 Decimal32'] = $ck->query("select id,f11 from t6 where f11='552.339'");
+
 $data['select t6 Decimal64'] = $ck->query("select id,f12 from t6 where f12='-3658.69540'");
+
 $data['select t6 Decimal128'] = $ck->query("select id,f13 from t6 where f13='170141183460469231168730371588.4105721'");
+
 $data['select t6 uuid'] = $ck->query("select id,f18 from t6 where f18='3026ee79-ac2a-46d2-882d-959a55d71025'");
+
 $data['select t6 date'] = $ck->query("select id,f19 from t6 where f19='2020-09-05'");
+
 $data['select t6 datetime'] = $ck->query("select id,f21 from t6 where f21='2020-09-07 20:25:12'");
+
 $data['select t6 datetime64'] = $ck->query("select id,f22 from t6 where f22='2020-09-06 20:25:12.258'");
-$data['select t6 ip'] = $ck->query("select id,f23,f25 from t6 where f23=".Types::encodeIpv4('192.168.1.1'));
-$data['select t6 ip64'] = $ck->query("select id,f23,f25 from t6 where f25='".Types::encodeIpv6('1030::c9b4:ff12:48aa:1a2b')."'");
+
+$data['select t6 ip'] = $ck->query("select id,f23,f25 from t6 where f23=" . Types::encodeIpv4('192.168.1.1'));
+
+$data['select t6 ip64'] = $ck->query("select id,f23,f25 from t6 where f25='" . Types::encodeIpv6('1030::c9b4:ff12:48aa:1a2b') . "'");
 
 echo json_encode($data);
 
 
-// Batch write
-$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
-$table                = [
-    'CREATE TABLE t7 (',
-    '`id` UInt32,',
-    '`f2` Nullable(Int32),',
-    '`f5` UInt16,',
-    '`f15` String',
-    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
-];
-$data['create table'] = $ck->query(implode("\n", $table));
-$ck->writeStart('t7',['id','f2','f5','f15']);
-for ($i = 0; $i < 100; $i++) {
-    $da = [];
-    for ($j = 0; $j < 1000; $j++) {
-        $da[] = [
-            'id' => mt_rand(1,1000000),
-            'f2' => mt_rand(-1000000,1000000),
-            'f5' => mt_rand(1,10000),
-            'f15' => md5(mt_rand(1,10000))
-        ];
-    }
-    $ck->writeBlock($da);
-}
 
-$ck->writeEnd();
+// Batch write
+//$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
+//$table                = [
+//    'CREATE TABLE t7 (',
+//    '`id` UInt32,',
+//    '`f2` Nullable(Int32),',
+//    '`f5` UInt16,',
+//    '`f15` String',
+//    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
+//];
+//$data['create table'] = $ck->query(implode("\n", $table));
+//$ck->writeStart('t7',['id','f2','f5','f15']);
+//for ($i = 0; $i < 100; $i++) {
+//    $da = [];
+//    for ($j = 0; $j < 1000; $j++) {
+//        $da[] = [
+//            'id' => mt_rand(1,1000000),
+//            'f2' => mt_rand(-1000000,1000000),
+//            'f5' => mt_rand(1,10000),
+//            'f15' => md5(mt_rand(1,10000))
+//        ];
+//    }
+//    $ck->writeBlock($da);
+//}
+//
+//$ck->writeEnd();
+//
+//echo microtime(true) - $t1;
+
 
 ```
 
