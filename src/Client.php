@@ -282,9 +282,7 @@ class Client
     public function query($sql)
     {
         $this->sendQuery($sql);
-        $this->writeEnd();
-        return $this->receive();
-
+        return $this->writeEnd();
     }
 
     /**
@@ -297,8 +295,7 @@ class Client
     {
         $this->writeStart($table, array_keys($data[0]));
         $this->writeBlock($data);
-        $this->writeEnd();
-        return $this->receive();
+        return $this->writeEnd();
     }
 
     /**
@@ -310,7 +307,7 @@ class Client
     {
         $table = trim($table);
         $this->sendQuery('INSERT INTO ' . $table . ' (' . implode(',', $fields) . ') VALUES ');
-        $this->writeEnd();
+        $this->writeEnd(false);
         while (true) {
             $code = $this->read->number();
             if ($code == Protocol::SERVER_DATA) {
@@ -389,15 +386,19 @@ class Client
     }
 
     /**
+     * @param false $get_ret
      * @return array|bool
      * @throws CkException
      */
-    public function writeEnd()
+    public function writeEnd($get_ret = true)
     {
         $this->writeBlockHead();
         $this->write->number(0);
         $this->write->number(0);
         $this->write->flush();
+        if ($get_ret) {
+            return $this->receive();
+        }
     }
 
     private function writeBlockHead()

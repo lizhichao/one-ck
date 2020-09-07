@@ -169,7 +169,7 @@ echo json_encode($data);
 
 
 
-// Batch write
+//// Batch write
 //$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
 //$table                = [
 //    'CREATE TABLE t7 (',
@@ -197,3 +197,4 @@ echo json_encode($data);
 //$ck->writeEnd();
 //
 //echo microtime(true) - $t1;
+//
