@@ -44,7 +44,7 @@ class Client
         $time_out   = isset($options['time_out']) ? $options['time_out'] : 3;
         $this->conn = stream_socket_client($dsn, $code, $msg, $time_out);
         if (!$this->conn) {
-            throw new \Exception($msg, $code);
+            throw new CkException($msg, $code);
         }
         stream_set_timeout($this->conn, $time_out);
         $this->write = new Write($this->conn);
@@ -108,6 +108,7 @@ class Client
                     return true;
                 case Protocol::SERVER_EXCEPTION:
                     $this->readErr();
+                    break;
                 case Protocol::SERVER_DATA:
                     $n = $this->readData();
                     if ($n > 1) {
@@ -145,13 +146,13 @@ class Client
                     break;
                 case Protocol::SERVER_TOTALS:
                 case Protocol::SERVER_EXTREMES:
-                    throw new CkException('Report to me this error ' . $code, 10005);
+                    throw new CkException('Report to me this error ' . $code, CkException::CODE_UNDO);
                     break;
                 case Protocol::SERVER_PONG:
                     $this->read->flush();
                     return true;
                 default:
-                    throw new CkException('undefined code ' . $code, 10005);
+                    throw new CkException('undefined code ' . $code, CkException::CODE_UNDEFINED);
             }
             $code = null;
         } while (true);
@@ -175,7 +176,7 @@ class Client
     private function isNull($t, $n)
     {
         $t = strtolower($t);
-        if (strpos($t, 'nullable(') === 0) {
+        if (substr($t, 0, 9) === 'nullable(') {
             for ($i = 0; $i < $n; $i++) {
                 $j = $this->read->number();
                 if ($j === 1) {
@@ -318,7 +319,7 @@ class Client
             } else if ($code == Protocol::SERVER_EXCEPTION) {
                 $this->readErr();
             } else {
-                throw new CkException('insert err code:' . $code, 10015);
+                throw new CkException('insert err code:' . $code, CkException::CODE_INSERT_ERR);
             }
         }
     }
@@ -330,7 +331,7 @@ class Client
     public function writeBlock($data)
     {
         if (count($this->fields) === 0) {
-            throw new CkException('Please execute first writeStart', 10036);
+            throw new CkException('Please execute first writeStart', CkException::CODE_TODO_WRITE_START);
         }
         $this->writeBlockHead();
 
@@ -370,7 +371,7 @@ class Client
     private function writeIsNull($type, $data)
     {
         $t = strtolower($type);
-        if (strpos($t, 'nullable(') === 0) {
+        if (substr($t, 0, 9) === 'nullable(') {
             foreach ($data as $i => $v) {
                 if ($v === null) {
                     $this->_is_null[$i] = 1;

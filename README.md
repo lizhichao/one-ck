@@ -9,7 +9,7 @@
 - [x] Float32, Float64
 - [x] Decimal(P, S), Decimal32(S), Decimal64(S), Decimal128(S)
 - [x] String
-- [x] Fixedstring(n)
+- [x] FixedString(N)
 - [x] UUID 
 - [x] Date
 - [x] Datetime

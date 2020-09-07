@@ -39,7 +39,7 @@ class Read
         if ($this->i >= $this->len) {
             $this->get();
             if ($this->i >= $this->len) {
-                throw new CkException('read fail', 10002);
+                throw new CkException('no receive', CkException::CODE_RECEIVE_NULL);
             }
         }
         $r = $this->buf[$this->i];
@@ -51,7 +51,7 @@ class Read
     {
         $buffer = fread($this->conn, 4096);
         if ($buffer === false) {
-            throw new CkException('read from remote timeout', 10003);
+            throw new CkException('read from fail', CkException::CODE_READ_FAIL);
         }
         $this->buf .= $buffer;
         $this->len = strlen($this->buf);

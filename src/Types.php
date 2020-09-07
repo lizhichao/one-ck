@@ -59,6 +59,14 @@ class Types
 
     protected function alias($type)
     {
+        if (isset($this->base_types[$type])) {
+            return $type;
+        }
+
+        if ($type === 'string') {
+            return $type;
+        }
+
         $arr = [
             'decimal32' => 'float32',
             'decimal64' => 'float64',
@@ -87,8 +95,22 @@ class Types
         if (substr($type, 0, 11) === 'datetime64(') {
             return 'uint64';
         }
+//        $this->arr_dp = [];
+//        while (substr($type, 0, 6) === 'array(') {
+//            $this->arr_dp[] = 'array';
+//            $type           = substr($type, 6, -1);
+//        }
+//        if (count($this->arr_dp) > 0) {
+//            if (substr($type, 0, 9) === 'nullable(') {
+//                $this->arr_dp[] = 'nullable';
+//                $type           = substr($type, 9, -1);
+//            }
+//            return $this->alias($type);
+//        }
         return $type;
     }
+
+    protected $arr_dp = [];
 
     protected function writeFormat($data, $type)
     {
@@ -219,15 +241,35 @@ class Types
         } else if ($type === 'uuid') {
             return $this->uuidUnpack();
         } else {
-            throw new CkException('unset type :' . $type, 10126);
+            throw new CkException('not supported type :' . $type, CkException::CODE_NOT_SUPPORTED_TYPE);
+        }
+    }
+
+    protected function getArrIndex()
+    {
+        $r = [];
+        foreach ($this->arr_dp as $v) {
+            $l   = unpack('uint64', $this->read->fixed(8))[1];
+            $r[] = $l;
         }
     }
 
     public function unpack($type)
     {
-        return $this->readFormat(
-            $this->sInfo($this->alias($type)),
-            $type);
+        $real_type = $this->alias($type);
+        if (count($this->arr_dp) > 0) {
+            $l = $this->sInfo('uint64');
+            foreach ($this->arr_dp as $p) {
+                $type = substr($type, strlen($p) + 1, -1);
+            }
+            $r = [];
+            for ($i = 0; $i < $l; $i++) {
+                $r[] = $this->readFormat($this->sInfo($real_type), $type);
+            }
+            return $r;
+        } else {
+            return $this->readFormat($this->sInfo($real_type), $type);
+        }
     }
 
 
@@ -247,7 +289,7 @@ class Types
         } else if ($type === 'uuid') {
             $this->write->addBuf(self::encodeUuid($data));
         } else {
-            throw new CkException('unset type :' . $type, 10125);
+            throw new CkException('unset type :' . $type, CkException::CODE_UNSET_TYPE);
         }
     }
 

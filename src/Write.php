@@ -79,16 +79,10 @@ class Write
         if ($this->buf === '') {
             return true;
         }
-
         $len = fwrite($this->conn, $this->buf);
         if ($len !== strlen($this->buf)) {
-            throw new CkException('write fail', 10001);
+            throw new CkException('write fail', CkException::CODE_WRITE_FAIL);
         }
-//        echo __METHOD__ . PHP_EOL;
-//        for ($i = 0; $i < strlen($this->buf); $i++) {
-//            echo $i . '->' . ord($this->buf[$i]) . ' => ' . $this->buf[$i] . PHP_EOL;
-//        }
-//        echo '------ end ------' . PHP_EOL;
         $this->buf = '';
         return true;
     }
