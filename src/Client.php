@@ -397,7 +397,7 @@ class Client
         $this->write->number(0);
         $this->write->number(0);
         $this->write->flush();
-        if ($get_ret) {
+        if ($get_ret === true) {
             return $this->receive();
         }
     }

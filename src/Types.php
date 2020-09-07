@@ -257,7 +257,7 @@ class Types
     public function unpack($type)
     {
         $real_type = $this->alias($type);
-        if (count($this->arr_dp) > 0) {
+        if (isset($this->arr_dp[0])) {
             $l = $this->sInfo('uint64');
             foreach ($this->arr_dp as $p) {
                 $type = substr($type, strlen($p) + 1, -1);
