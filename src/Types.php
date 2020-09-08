@@ -350,11 +350,12 @@ class Types
             for ($i = 0; $i < $row_count; $i++) {
                 $n = $this->read->number();
                 if ($n === 1) {
-                    $this->col_data[$i] = null;
+                    $this->is_null_data[$i] = 1;
                 }
             }
+        } else {
+            $this->is_null_data = [];
         }
-        $this->arr_is_null = [];
     }
 
     /**
@@ -575,6 +576,9 @@ class Types
         } else {
             $this->getNull($row_count);
             $this->decode($real_type, $row_count);
+            foreach ($this->is_null_data as $i => $v) {
+                $this->col_data[$i] = null;
+            }
             $this->unFormat($type);
             return $this->col_data;
         }
@@ -582,10 +586,10 @@ class Types
 
     public function pack($data, $type)
     {
-        $type = strtolower($type);
-        $this->format($data, $type);
+        $type          = strtolower($type);
         $this->is_null = false;
         $real_type     = $this->alias($type);
+        $this->format($data, $type);
         if (isset($this->arr_dp[0])) {
             $this->setArrData($data, $type, $real_type);
         } else {

@@ -330,15 +330,6 @@ class Client
             $type = $this->fields[$field];
             $this->write->string($field, $type);
             $this->types->pack($data, $type);
-//            $type = $this->writeIsNull($type, $data);
-//            $this->write->number(...$this->_is_null);
-//            foreach ($data as $i => $d) {
-//                $this->types->pack(
-//                    (isset($this->_is_null[$i]) && $this->_is_null[$i] === 1) ?
-//                        0 :
-//                        $d,
-//                    $type);
-//            }
             $this->write->flush();
         }
         $this->write->flush();

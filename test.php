@@ -56,7 +56,7 @@ $data['create table'] = $ck->query(implode("\n", $table));
 
 $data['insert data'] = $ck->insert('t6', [
     [
-        'id'  => 2,
+        'id'  => 1,
         'f1'  => -3,
         'f2'  => null,
         'f3'  => 127,
