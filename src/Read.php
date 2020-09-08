@@ -27,9 +27,10 @@ class Read
      */
     public function fixed($n)
     {
-        $s = str_repeat('1', $n);
+        $this->echo_str();
+        $s = '';
         for ($i = 0; $i < $n; $i++) {
-            $s[$i] = $this->getChar();
+            $s .= $this->getChar();
         }
         return $s;
     }
@@ -117,6 +118,7 @@ class Read
      */
     public function string()
     {
+//        $this->echo_str();
         $l = ord($this->getChar());
         $s = '';
         for ($i = 0; $i < $l; $i++) {

@@ -95,22 +95,133 @@ class Types
         if (substr($type, 0, 11) === 'datetime64(') {
             return 'uint64';
         }
-//        $this->arr_dp = [];
-//        while (substr($type, 0, 6) === 'array(') {
-//            $this->arr_dp[] = 'array';
-//            $type           = substr($type, 6, -1);
-//        }
-//        if (count($this->arr_dp) > 0) {
-//            if (substr($type, 0, 9) === 'nullable(') {
-//                $this->arr_dp[] = 'nullable';
-//                $type           = substr($type, 9, -1);
-//            }
-//            return $this->alias($type);
-//        }
+        $this->arr_dp = [];
+        while (substr($type, 0, 6) === 'array(') {
+            $this->arr_dp[] = 'array';
+            $type           = substr($type, 6, -1);
+        }
+        if (count($this->arr_dp) > 0) {
+            if (substr($type, 0, 9) === 'nullable(') {
+                $this->arr_val_is_null = true;
+                $type                  = substr($type, 9, -1);
+            }
+            $this->arr_type = $type;
+            return $this->alias($type);
+        }
         return $type;
     }
 
-    protected $arr_dp = [];
+    protected $arr_dp          = [];
+    protected $arr_val_is_null = false;
+    protected $arr_index_ar    = [];
+    protected $arr_i           = 0;
+    protected $arr_is_null     = [];
+    protected $arr_type        = '';
+
+    protected function getArrIndex(&$ret)
+    {
+        foreach ($ret as &$v) {
+            $l = $v;
+            $v = [];
+            for ($i = 0; $i < $l; $i++) {
+                $aa          = $this->sInfo('uint64');
+                $v[]         = $aa - $this->arr_i;
+                $this->arr_i = $aa;
+            }
+            $this->arr_index_ar[] = &$v;
+        }
+    }
+
+    protected function getArrData($real_type, $type)
+    {
+        $j           = 0;
+        $this->arr_i = 0;
+        $ret         = [$this->sInfo('uint64')];
+        $array_deep  = count($this->arr_dp) - 2;
+        if ($array_deep > 0) {
+            $this->getArrIndex($ret);
+            while ($array_deep--) {
+                $this->arr_i = 0;
+                $l           = count($this->arr_index_ar);
+                for ($i = $j; $i < $l + $j; $i++) {
+                    $this->getArrIndex($this->arr_index_ar[$i]);
+                }
+                for ($i = $j; $i < $l + $j; $i++) {
+                    unset($this->arr_index_ar[$i]);
+                }
+                $j += $l;
+            }
+        } else if ($array_deep === 0) {
+            $this->getArrIndex($ret);
+        } else {
+            $ret                = [$ret];
+            $this->arr_index_ar = [
+                &$ret[0]
+            ];
+        }
+        $this->arrIsNull();
+        $j = 0;
+        foreach ($this->arr_index_ar as &$val) {
+            foreach ($val as &$vr) {
+                $vr = array_fill(0, $vr, 0);
+                foreach ($vr as &$v) {
+                    $v = $this->readFormat($this->sInfo($real_type), $this->arr_type);
+                    if (isset($this->arr_is_null[$j])) {
+                        $v = null;
+                    }
+                    $j++;
+                }
+            }
+        }
+        $this->arr_is_null     = [];
+        $this->arr_dp          = [];
+        $this->arr_val_is_null = false;
+        $this->arr_index_ar    = [];
+        $this->arr_i           = 0;
+
+        return $ret[0];
+    }
+
+    protected function arrIsNull()
+    {
+        $i = 0;
+        if ($this->arr_val_is_null) {
+            foreach ($this->arr_index_ar as $val) {
+                foreach ($val as $_r) {
+                    for ($k = 0; $k < $_r; $k++) {
+                        $j = $this->read->number();
+                        if ($j === 1) {
+                            $this->arr_is_null[$i] = 1;
+                        }
+                        $i++;
+                    }
+                }
+            }
+        } else {
+            $this->arr_is_null = [];
+        }
+    }
+
+    /**
+     * @param $data
+     */
+    protected function writeIsNull($data)
+    {
+        if ($this->arr_val_is_null) {
+            foreach ($data as $i => $v) {
+                if ($v === null) {
+                    $this->arr_is_null[$i] = 1;
+                } else {
+                    $this->arr_is_null[$i] = 0;
+                }
+            }
+            $this->write->number(...$this->arr_is_null);
+            $this->arr_is_null = [];
+        } else {
+            $this->arr_is_null = [];
+        }
+    }
+
 
     protected function writeFormat($data, $type)
     {
@@ -245,51 +356,92 @@ class Types
         }
     }
 
-    protected function getArrIndex()
-    {
-        $r = [];
-        foreach ($this->arr_dp as $v) {
-            $l   = unpack('uint64', $this->read->fixed(8))[1];
-            $r[] = $l;
-        }
-    }
 
-    public function unpack($type)
+    public function unpack($type, $row_count)
     {
         $real_type = $this->alias($type);
         if (isset($this->arr_dp[0])) {
-            $l = $this->sInfo('uint64');
-            foreach ($this->arr_dp as $p) {
-                $type = substr($type, strlen($p) + 1, -1);
-            }
-            $r = [];
-            for ($i = 0; $i < $l; $i++) {
-                $r[] = $this->readFormat($this->sInfo($real_type), $type);
-            }
-            return $r;
+            return $this->getArrData($real_type, $type);
         } else {
             return $this->readFormat($this->sInfo($real_type), $type);
+        }
+    }
+
+    protected function setArrData($in_da, $type, $real_type)
+    {
+        $data   = [];
+        $index  = [$in_da];
+        $r      = [];
+        $arr_dp = 0;
+        while (true) {
+            $del = [];
+            $j   = 0;
+            foreach ($index as $i => $val) {
+                $j     += count($val);
+                $r[]   = $j;
+                $del[] = $i;
+                if (isset($val[0]) && is_array($val[0])) {
+                    foreach ($val as $v) {
+                        $index[] = $v;
+                    }
+                } else {
+                    $data = array_merge($data, $val);
+                }
+            }
+            foreach ($del as $i) {
+                unset($index[$i]);
+            }
+            if (empty($index)) {
+                break;
+            }
+            $arr_dp++;
+        }
+
+        if ((count($this->arr_dp) - 1) !== $arr_dp) {
+            throw new CkException('array deep err', CkException::CODE_ARR_ERR);
+        }
+
+        $this->write->addBuf(pack("{$this->base_types['uint64'][0]}*", ...$r));
+        $this->writeIsNull($data);
+        foreach ($data as $v) {
+            $this->encode($this->writeFormat($v, $this->arr_type), $type, $real_type);
+        }
+
+        $this->arr_dp          = [];
+        $this->arr_val_is_null = false;
+        $this->arr_index_ar    = [];
+        $this->arr_i           = 0;
+        $this->arr_is_null     = [];
+
+    }
+
+    protected function encode($data, $type, $real_type)
+    {
+        if (isset($this->base_types[$real_type])) {
+            $this->write->addBuf(pack("{$this->base_types[$real_type][0]}", $data));
+        } else if ($real_type === 'string') {
+            $this->write->string($data);
+        } else if (substr($real_type, 0, 12) === 'fixedstring(') {
+            $n = intval(substr($real_type, 12, -1));
+            $this->write->addBuf(self::encodeFixedString($data, $n));
+        } else if ($real_type === 'int128') {
+            $this->write->addBuf($this->int128Pack($data));
+        } else if ($real_type === 'uuid') {
+            $this->write->addBuf(self::encodeUuid($data));
+        } else {
+            throw new CkException('unset type :' . $type, CkException::CODE_UNSET_TYPE);
         }
     }
 
 
     public function pack($data, $type)
     {
-        $data = $this->writeFormat($data, $type);
-        $type = $this->alias($type);
-        if (isset($this->base_types[$type])) {
-            $this->write->addBuf(pack("{$this->base_types[$type][0]}*", $data));
-        } else if ($type === 'string') {
-            $this->write->string($data);
-        } else if (substr($type, 0, 12) === 'fixedstring(') {
-            $n = intval(substr($type, 12, -1));
-            $this->write->addBuf(self::encodeFixedString($data, $n));
-        } else if ($type === 'int128') {
-            $this->write->addBuf($this->int128Pack($data));
-        } else if ($type === 'uuid') {
-            $this->write->addBuf(self::encodeUuid($data));
+        $data      = $this->writeFormat($data, $type);
+        $real_type = $this->alias($type);
+        if (isset($this->arr_dp[0])) {
+            $this->setArrData($data, $type, $real_type);
         } else {
-            throw new CkException('unset type :' . $type, CkException::CODE_UNSET_TYPE);
+            $this->encode($data, $type, $real_type);
         }
     }
 

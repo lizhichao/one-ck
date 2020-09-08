@@ -13,4 +13,6 @@ class CkException extends \Exception
     const CODE_INSERT_ERR         = 10007;
     const CODE_TODO_WRITE_START   = 10008;
     const CODE_RECEIVE_NULL       = 10009;
+
+    const CODE_ARR_ERR = 10010;
 }

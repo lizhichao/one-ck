@@ -205,7 +205,7 @@ class Client
             $t = $this->read->string();
             $t = $this->isNull($t, $row_count);
             for ($i = 0; $i < $row_count; $i++) {
-                $v = $this->types->unpack($t);
+                $v = $this->types->unpack($t, $row_count);
 
                 $this->_row_data[$i + $this->_total_row][$f] = isset($this->_is_null[$i]) ? null : $v;
             }
