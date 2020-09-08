@@ -19,12 +19,8 @@ class Types
 
     protected $col_data = [];
 
-    protected $arr_dp          = [];
-    protected $arr_val_is_null = false;
-    protected $arr_index_ar    = [];
-    protected $arr_i           = 0;
-    protected $arr_is_null     = [];
-    protected $arr_type        = '';
+    protected $arr_dp   = [];
+    protected $arr_type = '';
 
     protected $base_types = [
         'int8'    => ['c', 1],
@@ -267,82 +263,114 @@ class Types
         if (self::isDatetime64($type)) {
             return 'uint64';
         }
-        $this->arr_dp = [];
         while (self::isArray($type)) {
             $this->arr_dp[] = 'array';
             $type           = substr($type, 6, -1);
         }
         if (count($this->arr_dp) > 0) {
             $this->arr_type = $type;
-            return $this->alias($type);
+            return $this->alias($this->arr_type);
         }
         return $type;
     }
 
 
-    protected function getArrIndex(&$ret)
+    protected function getArrData($row_count, $real_type)
     {
-        foreach ($ret as &$v) {
-            $l = $v;
-            $v = [];
-            for ($i = 0; $i < $l; $i++) {
-                $aa          = $this->decode('uint64');
-                $v[]         = $aa - $this->arr_i;
-                $this->arr_i = $aa;
-            }
-            $this->arr_index_ar[] = &$v;
-        }
-    }
-
-    protected function getArrData($real_type, $type)
-    {
-        $j           = 0;
-        $this->arr_i = 0;
-        $ret         = [$this->decode('uint64')];
-        $array_deep  = count($this->arr_dp) - 2;
-        if ($array_deep > 0) {
-            $this->getArrIndex($ret);
-            while ($array_deep--) {
-                $this->arr_i = 0;
-                $l           = count($this->arr_index_ar);
-                for ($i = $j; $i < $l + $j; $i++) {
-                    $this->getArrIndex($this->arr_index_ar[$i]);
+        $deep  = count($this->arr_dp);
+        $data  = array_fill(0, $row_count, []);
+        $arr   = [];
+        $els   = [];
+        $first = true;
+        while ($deep--) {
+            $del = [];
+            $l   = count($data);
+            $p   = 0;
+            foreach ($data as $i => &$val) {
+                if ($first) {
+                    $arr[] = &$val;
                 }
-                for ($i = $j; $i < $l + $j; $i++) {
-                    unset($this->arr_index_ar[$i]);
-                }
-                $j += $l;
-            }
-        } else if ($array_deep === 0) {
-            $this->getArrIndex($ret);
-        } else {
-            $ret                = [$ret];
-            $this->arr_index_ar = [
-                &$ret[0]
-            ];
-        }
-        $this->getNull();
-        $j = 0;
-        foreach ($this->arr_index_ar as &$val) {
-            foreach ($val as &$vr) {
-                $vr = array_fill(0, $vr, 0);
-                foreach ($vr as &$v) {
-                    $v = $this->unFormat($this->decode($real_type), $this->arr_type);
-                    if (isset($this->arr_is_null[$j])) {
-                        $v = null;
+                $num = unpack('Q', $this->read->fixed(8))[1];
+                $val = array_fill(0, $num - $p, []);
+                $p   = $num;
+                foreach ($val as &$v) {
+                    if ($deep > 0) {
+                        $data[] = &$v;
+                    } else {
+                        $els[] = &$v;
                     }
-                    $j++;
+                }
+                $del[] = $i;
+                $l--;
+                if ($l === 0) {
+                    break;
                 }
             }
+            foreach ($del as $i) {
+                unset($data[$i]);
+            }
+            $first = false;
         }
-        $this->arr_is_null     = [];
-        $this->arr_dp          = [];
-        $this->arr_val_is_null = false;
-        $this->arr_index_ar    = [];
-        $this->arr_i           = 0;
 
-        return $ret[0];
+        $row_count = count($els);
+        $this->getNull($row_count);
+        $this->decode($real_type, $row_count);
+        foreach ($this->is_null_data as $i => $v) {
+            $this->col_data[$i] = null;
+        }
+        $this->unFormat($this->arr_type);
+        foreach ($els as $i => &$v) {
+            $v = $this->col_data[$i];
+        }
+        $this->col_data = [];
+        $this->arr_dp   = [];
+
+        return $arr;
     }
+
+    protected function setArrData($in_da, $type, $real_type)
+    {
+        $data   = [];
+        $index  = [$in_da];
+        $r      = [];
+        $arr_dp = 0;
+        while (true) {
+            $del = [];
+            $j   = 0;
+            foreach ($index as $i => $val) {
+                $j     += count($val);
+                $r[]   = $j;
+                $del[] = $i;
+                if (isset($val[0]) && is_array($val[0])) {
+                    foreach ($val as $v) {
+                        $index[] = $v;
+                    }
+                } else {
+                    $data = array_merge($data, $val);
+                }
+            }
+            foreach ($del as $i) {
+                unset($index[$i]);
+            }
+            if (empty($index)) {
+                break;
+            }
+            $arr_dp++;
+        }
+
+        if (count($this->arr_dp) !== $arr_dp) {
+            throw new CkException('array deep err', CkException::CODE_ARR_ERR);
+        }
+        array_shift($r);
+        $this->write->addBuf(pack("{$this->base_types['uint64'][0]}*", ...$r));
+        $this->setNull($data);
+        $this->format($data, $this->arr_type);
+        $this->encode($data, $type, $real_type);
+
+        $this->arr_dp = [];
+
+    }
+
 
     protected function getNull($row_count)
     {
@@ -572,7 +600,7 @@ class Types
         $this->is_null = false;
         $real_type     = $this->alias($type);
         if (isset($this->arr_dp[0])) {
-            return $this->getArrData($real_type, $type);
+            return $this->getArrData($row_count, $real_type);
         } else {
             $this->getNull($row_count);
             $this->decode($real_type, $row_count);
@@ -597,55 +625,5 @@ class Types
             $this->encode($data, $type, $real_type);
         }
     }
-
-
-    protected function setArrData($in_da, $type, $real_type)
-    {
-//        $data   = [];
-//        $index  = [$in_da];
-//        $r      = [];
-//        $arr_dp = 0;
-//        while (true) {
-//            $del = [];
-//            $j   = 0;
-//            foreach ($index as $i => $val) {
-//                $j     += count($val);
-//                $r[]   = $j;
-//                $del[] = $i;
-//                if (isset($val[0]) && is_array($val[0])) {
-//                    foreach ($val as $v) {
-//                        $index[] = $v;
-//                    }
-//                } else {
-//                    $data = array_merge($data, $val);
-//                }
-//            }
-//            foreach ($del as $i) {
-//                unset($index[$i]);
-//            }
-//            if (empty($index)) {
-//                break;
-//            }
-//            $arr_dp++;
-//        }
-//
-//        if ((count($this->arr_dp) - 1) !== $arr_dp) {
-//            throw new CkException('array deep err', CkException::CODE_ARR_ERR);
-//        }
-//
-//        $this->write->addBuf(pack("{$this->base_types['uint64'][0]}*", ...$r));
-//        $this->setNull($data);
-//        foreach ($data as $v) {
-//            $this->encode($this->format($v, $this->arr_type), $type, $real_type);
-//        }
-//
-//        $this->arr_dp          = [];
-//        $this->arr_val_is_null = false;
-//        $this->arr_index_ar    = [];
-//        $this->arr_i           = 0;
-//        $this->arr_is_null     = [];
-
-    }
-
 
 }

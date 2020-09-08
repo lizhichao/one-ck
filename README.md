@@ -17,9 +17,9 @@
 - [x] Nullable(T)
 - [x] IPv4
 - [x] IPv6
-- [ ] Enum
-- [ ] Array(T)
+- [x] Array(T)
 - [ ] Tuple(T)
+- [ ] Enum (can use `LowCardinality` instead)
 
 
 ### Demo
