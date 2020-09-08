@@ -81,7 +81,6 @@ class Client
     private $_server_info = [];
     private $_row_data    = [];
     private $_total_row   = 0;
-    private $_is_null     = [];
     private $fields       = [];
 
 
@@ -92,7 +91,6 @@ class Client
     {
         $this->_row_data  = [];
         $this->_total_row = 0;
-        $this->_is_null   = [];
         $this->fields     = [];
         $_progress_info   = [];
         $_profile_info    = [];
@@ -173,24 +171,6 @@ class Client
     }
 
 
-    private function isNull($t, $n)
-    {
-        $t = strtolower($t);
-        if (substr($t, 0, 9) === 'nullable(') {
-            for ($i = 0; $i < $n; $i++) {
-                $j = $this->read->number();
-                if ($j === 1) {
-                    $this->_is_null[$i] = 1;
-                }
-            }
-            return substr($t, 9, -1);
-        } else {
-            $this->_is_null = [];
-            return $t;
-        }
-    }
-
-
     private function readData()
     {
         if (count($this->fields) === 0) {
@@ -201,13 +181,13 @@ class Client
             return $code;
         }
         foreach ($this->fields as $t) {
-            $f = $this->read->string();
-            $t = $this->read->string();
-            $t = $this->isNull($t, $row_count);
-            for ($i = 0; $i < $row_count; $i++) {
-                $v = $this->types->unpack($t, $row_count);
-
-                $this->_row_data[$i + $this->_total_row][$f] = isset($this->_is_null[$i]) ? null : $v;
+            $f   = $this->read->string();
+            $t   = $this->read->string();
+            $col = $this->types->unpack($t, $row_count);
+            $i   = 0;
+            foreach ($col as $el) {
+                $this->_row_data[$i + $this->_total_row][$f] = $el;
+                $i++;
             }
         }
         $this->_total_row += $row_count;
@@ -349,41 +329,20 @@ class Client
         foreach ($new_data as $field => $data) {
             $type = $this->fields[$field];
             $this->write->string($field, $type);
-            $type = $this->writeIsNull($type, $data);
-            $this->write->number(...$this->_is_null);
-            foreach ($data as $i => $d) {
-                $this->types->pack(
-                    (isset($this->_is_null[$i]) && $this->_is_null[$i] === 1) ?
-                        0 :
-                        $d,
-                    $type);
-            }
+            $this->types->pack($data, $type);
+//            $type = $this->writeIsNull($type, $data);
+//            $this->write->number(...$this->_is_null);
+//            foreach ($data as $i => $d) {
+//                $this->types->pack(
+//                    (isset($this->_is_null[$i]) && $this->_is_null[$i] === 1) ?
+//                        0 :
+//                        $d,
+//                    $type);
+//            }
             $this->write->flush();
         }
         $this->write->flush();
 
-    }
-
-    /**
-     * @param $type
-     * @param $field
-     */
-    private function writeIsNull($type, $data)
-    {
-        $t = strtolower($type);
-        if (substr($t, 0, 9) === 'nullable(') {
-            foreach ($data as $i => $v) {
-                if ($v === null) {
-                    $this->_is_null[$i] = 1;
-                } else {
-                    $this->_is_null[$i] = 0;
-                }
-            }
-            return substr($t, 9, -1);
-        } else {
-            $this->_is_null = [];
-            return $t;
-        }
     }
 
     /**

@@ -27,7 +27,7 @@ class Read
      */
     public function fixed($n)
     {
-        $this->echo_str();
+//        $this->echo_str();
         $s = '';
         for ($i = 0; $i < $n; $i++) {
             $s .= $this->getChar();
