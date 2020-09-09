@@ -32,20 +32,6 @@ class Read
         return $buffer;
     }
 
-    public function flush()
-    {
-        $this->buf = substr($this->buf, $this->i);
-        $this->len = strlen($this->buf);
-        $this->i   = 0;
-    }
-
-    public function clear()
-    {
-        $this->buf = '';
-        $this->len = 0;
-        $this->i   = 0;
-    }
-
     /**
      * @return int
      * @throws CkException

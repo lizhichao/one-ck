@@ -119,10 +119,8 @@ class Client
                         'bytes'      => $this->read->number(),
                         'total_rows' => $this->gtV(self::DBMS_MIN_V_TOTAL_ROWS_IN_PROGRESS) ? $this->read->number() : 0,
                     ];
-                    $this->read->flush();
                     break;
                 case Protocol::SERVER_END_OF_STREAM:
-                    $this->read->flush();
                     return $this->_row_data;
 //                    return [
 //                        'total_row'     => $this->_total_row,
@@ -140,14 +138,12 @@ class Client
                         'rows_before_limit'            => $this->read->number(),
                         'calculated_rows_before_limit' => $this->read->number()
                     ];
-                    $this->read->flush();
                     break;
                 case Protocol::SERVER_TOTALS:
                 case Protocol::SERVER_EXTREMES:
                     throw new CkException('Report to me this error ' . $code, CkException::CODE_UNDO);
                     break;
                 case Protocol::SERVER_PONG:
-                    $this->read->flush();
                     return true;
                 default:
                     throw new CkException('undefined code ' . $code, CkException::CODE_UNDEFINED);
@@ -191,7 +187,6 @@ class Client
             }
         }
         $this->_total_row += $row_count;
-        $this->read->flush();
         return 1;
     }
 
@@ -215,7 +210,6 @@ class Client
                 $this->fields[$this->read->string()] = $this->read->string();
             }
         }
-        $this->read->flush();
         return [0, $info['row_count']];
     }
 
@@ -228,7 +222,6 @@ class Client
             'version'       => $this->read->number(),
         ];
         $this->_server_info['time_zone'] = $this->gtV(self::DBMS_MIN_V_SERVER_TIMEZONE) ? $this->read->string() : '';
-        $this->read->clear();
     }
 
 
@@ -370,7 +363,6 @@ class Client
         $c   = $this->read->int();
         $n   = $this->read->string();
         $msg = $this->read->string();
-        $this->read->flush();
         throw new CkException(substr($msg, strlen($n) + 1), $c);
     }
 
