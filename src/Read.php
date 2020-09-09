@@ -20,42 +20,16 @@ class Read
         $this->conn = $conn;
     }
 
-    /**
-     * 固定长度
-     * @param int $n
-     * @return string
-     */
-    public function fixed($n)
+    public function getChar($n = 1)
     {
-//        $this->echo_str();
-        $s = '';
-        for ($i = 0; $i < $n; $i++) {
-            $s .= $this->getChar();
-        }
-        return $s;
-    }
-
-    private function getChar()
-    {
-        if ($this->i >= $this->len) {
-            $this->get();
-            if ($this->i >= $this->len) {
-                throw new CkException('no receive', CkException::CODE_RECEIVE_NULL);
-            }
-        }
-        $r = $this->buf[$this->i];
-        $this->i++;
-        return $r;
-    }
-
-    private function get()
-    {
-        $buffer = fread($this->conn, 4096);
+        $buffer = fread($this->conn, $n);
         if ($buffer === false) {
             throw new CkException('read from fail', CkException::CODE_READ_FAIL);
         }
-        $this->buf .= $buffer;
-        $this->len = strlen($this->buf);
+        if (strlen($buffer) < $n) {
+            $buffer .= $this->getChar($n - strlen($buffer));
+        }
+        return $buffer;
     }
 
     public function flush()
@@ -109,7 +83,7 @@ class Read
      */
     public function int()
     {
-        return unpack('l', $this->fixed(4))[1];
+        return unpack('l', $this->getChar(4))[1];
     }
 
     /**
@@ -119,11 +93,6 @@ class Read
     public function string()
     {
 //        $this->echo_str();
-        $l = ord($this->getChar());
-        $s = '';
-        for ($i = 0; $i < $l; $i++) {
-            $s .= $this->getChar();
-        }
-        return $s;
+        return $this->getChar(ord($this->getChar()));
     }
 }

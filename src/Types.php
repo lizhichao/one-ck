@@ -133,14 +133,14 @@ class Types
 
     protected function decodeUuid()
     {
-        $s = bin2hex($this->read->fixed(8));
+        $s = bin2hex($this->read->getChar(8));
         $r = '';
         for ($i = 14; $i >= 0; $i -= 2) {
             $r .= $s[$i] . $s[$i + 1];
         }
         $r = substr($r, 0, 8) . '-' . substr($r, 8, 4) . '-' . substr($r, 12);
 
-        $s  = bin2hex($this->read->fixed(8));
+        $s  = bin2hex($this->read->getChar(8));
         $r1 = '';
         for ($i = 14; $i >= 0; $i -= 2) {
             $r1 .= $s[$i] . $s[$i + 1];
@@ -155,7 +155,7 @@ class Types
      */
     protected function decodeInt128()
     {
-        $str  = $this->read->fixed(16);
+        $str  = $this->read->getChar(16);
         $is_n = false;
         if (ord($str[15]) > 127) {
             $is_n = true;
@@ -290,7 +290,7 @@ class Types
                 if ($first) {
                     $arr[] = &$val;
                 }
-                $num = unpack('Q', $this->read->fixed(8))[1];
+                $num = unpack('Q', $this->read->getChar(8))[1];
                 $val = array_fill(0, $num - $p, []);
                 $p   = $num;
                 foreach ($val as &$v) {
@@ -523,7 +523,7 @@ class Types
         if (isset($this->base_types[$type])) {
             $this->col_data = array_values(
                 unpack($this->base_types[$type][0] . '*',
-                    $this->read->fixed($this->base_types[$type][1] * $row_count))
+                    $this->read->getChar($this->base_types[$type][1] * $row_count))
             );
             return 1;
         }
@@ -535,7 +535,7 @@ class Types
         } else if (self::isFixedString($type)) {
             $n  = intval(substr($type, 12, -1));
             $fn = function () use ($n) {
-                return $this->read->fixed($n);
+                return $this->read->getChar($n);
             };
         } else if ($type === 'int128') {
             $fn = function () {
