@@ -42,7 +42,7 @@ class Read
         $b = 0;
         while (1) {
             $j = ord($this->getChar());
-            $r = ($j << ($b * 7)) | $r;
+            $r = (($j & 127) << ($b * 7)) | $r;
             if ($j < 128) {
                 return $r;
             }
