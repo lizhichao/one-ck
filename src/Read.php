@@ -78,7 +78,7 @@ class Read
      */
     public function string()
     {
-        $n = ord($this->getChar());
+        $n = $this->number();
         return $n === 0 ? '' : $this->getChar($n);
     }
 }
