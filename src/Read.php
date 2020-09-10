@@ -50,9 +50,9 @@ class Read
         }
     }
 
-    public function echo_str()
+    public function echo_str($n = 50)
     {
-        $s = $this->buf;
+        $s = $this->getChar($n);
         echo "--- start ---\n";
         echo 'total len ' . strlen($s) . PHP_EOL;
         echo $s . PHP_EOL;
@@ -78,7 +78,7 @@ class Read
      */
     public function string()
     {
-//        $this->echo_str();
-        return $this->getChar(ord($this->getChar()));
+        $n = ord($this->getChar());
+        return $n === 0 ? '' : $this->getChar($n);
     }
 }
