@@ -89,15 +89,12 @@ class Types
 
     public static function encodeUuid($data)
     {
-        $s = str_replace('-', '', $data);
-        $r = '';
-        for ($i = 14; $i >= 0; $i -= 2) {
-            $r .= chr(hexdec($s[$i] . $s[$i + 1]));
-        }
-        for ($i = 30; $i >= 16; $i -= 2) {
-            $r .= chr(hexdec($s[$i] . $s[$i + 1]));
-        }
-        return $r;
+        $s  = str_replace('-', '', $data);
+        $r1 = substr($s, 0, 8);
+        $r2 = substr($s, 8, 8);
+        $r3 = substr($s, 16, 8);
+        $r4 = substr($s, 24);
+        return pack('L4', hexdec($r2), hexdec($r1), hexdec($r4), hexdec($r3));
     }
 
     /**
