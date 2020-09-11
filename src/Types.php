@@ -57,7 +57,7 @@ class Types
                     $r = array_merge($r, array_fill(0, 9 - count($ar), '0000'));
                     continue;
                 }
-                $r[] = strlen($v) < 4 ? str_repeat('0', 4 - strlen($v)) . $v : $v;
+                $r[] = str_pad($v, 4, '0', STR_PAD_LEFT);
             }
             $ar = $r;
         }
@@ -66,7 +66,7 @@ class Types
 
     public static function encodeFixedString($str, $n)
     {
-        return $str . str_repeat(chr(0), $n - strlen($str));
+        return str_pad($str, $n, chr(0));
     }
 
     public static function encodeDate($date)
@@ -264,7 +264,7 @@ class Types
             $this->arr_dp[] = 'array';
             $type           = substr($type, 6, -1);
         }
-        if (count($this->arr_dp) > 0) {
+        if (isset($this->arr_dp[0])) {
             $this->arr_type = $type;
             return $this->alias($this->arr_type);
         }
