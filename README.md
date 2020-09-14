@@ -30,13 +30,11 @@ use OneCk\Types;
 //$ck = new Client('tcp://127.0.0.1:9000', 'default', '', 'default');
 
 $t1 = microtime(true);
+$t1 = microtime(true);
 $ck = new Client('tcp://192.168.31.216:9091', 'default', '123456', 'test1');
 
-
-$data['server info'] = $ck->getServerInfo();
-
-$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t6');
-
+$data['server info']  = $ck->getServerInfo();
+$data['drop table']   = $ck->query('DROP TABLE IF EXISTS t6');
 $table                = [
     'CREATE TABLE t6 (',
     '`id` UInt32,',
@@ -65,7 +63,10 @@ $table                = [
     '`f23` IPv4,',
     '`f24` Nullable(IPv4),',
     '`f25` IPv6,',
-    '`f26` LowCardinality(String)',
+    '`f26` LowCardinality(String),',
+    '`f27` Array(Int32),',
+    '`f28` Array(Array(Array(Nullable(Date)))),',
+    '`f29` Array(Array(Array(Array(Array(Nullable(Datetime))))))',
     ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
@@ -98,7 +99,10 @@ $data['insert data'] = $ck->insert('t6', [
         'f23' => '192.168.1.1',
         'f24' => null,
         'f25' => 'CDCD:910A:2222:5498:8475:1111:3900:2020',
-        'f26' => 'eee'
+        'f26' => 'eee',
+        'f27' => [0, -2, 3, 4, 5, 6, 7, 8, 64],
+        'f28' => [[['2020-01-05', null, '2020-01-06']], [['2020-01-07'], ['2020-01-08']], [['2020-01-09']]],
+        'f29' => [[[[["2020-01-05 05:05:05", null, "2020-01-06 15:16:17"]], [["2020-01-07 18:19:20"], ["2020-01-08 21:22:23"]], [["2020-01-09 00:00:00"]]], [[["2020-01-10 01:00:00", null]]]], [[[["2020-01-11 00:00:01", null, "2020-01-12 11:01:58"]], [["2020-01-13 21:22:01"]]]]]
     ],
     [
         'id'  => 2,
@@ -116,8 +120,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f12' => -3658.6954,
         'f13' => '-170141183460469231168730371588.4105721',
         'f14' => 3,
-        'f15' => 'aaa',
-        'f16' => 'aaa',
+        'f15' => str_repeat(md5('aa'), '6'),
+        'f16' => '',
         'f17' => md5('55'),
         'f18' => md5('55'),
         'f19' => '2020-09-06',
@@ -127,7 +131,10 @@ $data['insert data'] = $ck->insert('t6', [
         'f23' => '251.222.221.231',
         'f24' => '192.168.1.2',
         'f25' => '1030::C9B4:FF12:48AA:1A2B',
-        'f26' => 'eee22'
+        'f26' => 'eee22',
+        'f27' => [1, 2, 3, 4],
+        'f28' => [[['2020-01-05', '2020-01-06']], [['2020-01-07', null], ['2020-01-08']], [['2020-01-09']]],
+        'f29' => [[[[[null]]]]]
     ],
     [
         'id'  => 3,
@@ -156,15 +163,18 @@ $data['insert data'] = $ck->insert('t6', [
         'f23' => '192.168.1.1',
         'f24' => null,
         'f25' => '2001:DB8:2de::e13',
-        'f26' => 'eee22'
+        'f26' => 'eee22',
+        'f27' => [12344],
+        'f28' => [[['2020-01-05', '2020-01-06'], [null]], [['2020-01-07'], ['2020-01-08']], [['2020-01-09']]],
+        'f29' => [[[[['2018-01-25 11:25:14']]]]]
     ]
 ]);
 
 
 //$data['struct'] = $ck->query('desc t6');
 
-$data['select t6'] = $ck->query('select * from t6');
 
+$data['select t6'] = $ck->query('select * from t6');
 
 $data['select t6 int64'] = $ck->query("select id,f6 from t6 where f6=1844674407370955161");
 
@@ -187,10 +197,11 @@ $data['select t6 ip'] = $ck->query("select id,f23,f25 from t6 where f23=" . Type
 $data['select t6 ip64'] = $ck->query("select id,f23,f25 from t6 where f25='" . Types::encodeIpv6('1030::c9b4:ff12:48aa:1a2b') . "'");
 
 echo json_encode($data);
+exit;
+//
 
 
-
-// Batch write
+//// Batch write
 //$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
 //$table                = [
 //    'CREATE TABLE t7 (',
@@ -218,6 +229,7 @@ echo json_encode($data);
 //$ck->writeEnd();
 //
 //echo microtime(true) - $t1;
+//
 
 
 ```
