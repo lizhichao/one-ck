@@ -221,10 +221,27 @@ class Types
         return strpos($str, 'fixedstring(') === 0;
     }
 
+    public static function isSimpleAggregateFunction($str)
+    {
+        return strpos($str, 'simpleaggregatefunction(') === 0;
+    }
+
+    protected function getTypeFromSimpleAggregateFunction($type)
+    {
+        if (self::isSimpleAggregateFunction($type)) {
+            preg_match('/\((.*?)\,\s?(.*)\)/', $type, $matches);
+            if (empty($matches)) {
+                return $type;
+            }
+            $type = trim(end($matches));
+        }
+
+        return $type;
+    }
 
     protected function alias(&$tp)
     {
-        $type = $tp;
+        $type = $this->getTypeFromSimpleAggregateFunction($tp);
         if (isset($this->base_types[$type]) || $type === 'string' || self::isFixedString($type)) {
             return $type;
         }
@@ -463,6 +480,7 @@ class Types
 
     protected function unFormat($type)
     {
+        $type = $this->getTypeFromSimpleAggregateFunction($type);
         if (isset($this->base_types[$type]) || $type === 'string' || $type === 'uuid' || self::isFixedString($type)) {
             return 1;
         }
