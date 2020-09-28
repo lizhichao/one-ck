@@ -19,6 +19,7 @@
 - [x] IPv4
 - [x] IPv6
 - [x] Array(T)
+- [x] SimpleAggregateFunction(F, T)
 - [ ] Tuple(T)
 - [ ] Enum (can use `LowCardinality` instead)
 
