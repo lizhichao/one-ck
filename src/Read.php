@@ -23,7 +23,7 @@ class Read
     public function getChar($n = 1)
     {
         $buffer = fread($this->conn, $n);
-        if ($buffer === false) {
+        if ($buffer === false || !isset($buffer[0])) {
             throw new CkException('read from fail', CkException::CODE_READ_FAIL);
         }
         if (strlen($buffer) < $n) {

@@ -236,7 +236,8 @@ class Types
             'ipv4'      => 'uint32',
             'ipv6'      => 'fixedstring(16)',
             'enum8'     => 'int8',
-            'enum16'    => 'int16'
+            'enum16'    => 'int16',
+            'nothing'   => 'int8'
         ];
         if (isset($arr[$type])) {
             return $arr[$type];
@@ -322,7 +323,7 @@ class Types
         $this->col_data = [];
         $this->arr_dp   = [];
 
-        return $arr;
+        return isset($els[0]) ? $arr : [];
     }
 
     protected function setArrData($in_da, $type, $real_type)
@@ -499,6 +500,8 @@ class Types
             $fn = function ($v) {
                 return date('Y-m-d H:i:s', substr($v, 0, 10)) . '.' . substr($v, 10);
             };
+        } else {
+            return 1;
         }
 
         foreach ($this->col_data as &$el) {
@@ -517,6 +520,10 @@ class Types
      */
     protected function decode($type, $row_count)
     {
+        if ($row_count === 0) {
+            return 1;
+        }
+
         if (isset($this->base_types[$type])) {
             $this->col_data = array_values(
                 unpack($this->base_types[$type][0] . '*',

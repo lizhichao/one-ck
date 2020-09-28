@@ -174,37 +174,37 @@ $data['select t6 ip'] = $ck->query("select id,f23,f25 from t6 where f23=" . Type
 
 $data['select t6 ip64'] = $ck->query("select id,f23,f25 from t6 where f25='" . Types::encodeIpv6('1030::c9b4:ff12:48aa:1a2b') . "'");
 
+$data['nothing'] = $ck->query('select array()');
+
+
+
+// flow of  write
+$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
+$table                = [
+    'CREATE TABLE t7 (',
+    '`id` UInt32,',
+    '`f2` Nullable(Int32),',
+    '`f5` UInt16,',
+    '`f15` String',
+    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
+];
+$data['create table'] = $ck->query(implode("\n", $table));
+$ck->writeStart('t7',['id','f2','f5','f15']);
+for ($i = 0; $i < 100; $i++) {
+    $da = [];
+    for ($j = 0; $j < 1000; $j++) {
+        $da[] = [
+            'id' => mt_rand(1,1000000),
+            'f2' => mt_rand(-1000000,1000000),
+            'f5' => mt_rand(1,10000),
+            'f15' => md5(mt_rand(1,10000))
+        ];
+    }
+    $ck->writeBlock($da);
+}
+
+$ck->writeEnd();
+
+$data['time'] = microtime(true) - $t1;
+
 echo json_encode($data);
-exit;
-//
-
-
-//// Batch write
-//$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
-//$table                = [
-//    'CREATE TABLE t7 (',
-//    '`id` UInt32,',
-//    '`f2` Nullable(Int32),',
-//    '`f5` UInt16,',
-//    '`f15` String',
-//    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
-//];
-//$data['create table'] = $ck->query(implode("\n", $table));
-//$ck->writeStart('t7',['id','f2','f5','f15']);
-//for ($i = 0; $i < 100; $i++) {
-//    $da = [];
-//    for ($j = 0; $j < 1000; $j++) {
-//        $da[] = [
-//            'id' => mt_rand(1,1000000),
-//            'f2' => mt_rand(-1000000,1000000),
-//            'f5' => mt_rand(1,10000),
-//            'f15' => md5(mt_rand(1,10000))
-//        ];
-//    }
-//    $ck->writeBlock($da);
-//}
-//
-//$ck->writeEnd();
-//
-//echo microtime(true) - $t1;
-//
