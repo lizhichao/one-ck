@@ -205,6 +205,6 @@ for ($i = 0; $i < 100; $i++) {
 
 $ck->writeEnd();
 
-$data['time'] = microtime(true) - $t1;
+$data['write 10w rows time'] = microtime(true) - $t1;
 
 echo json_encode($data);
