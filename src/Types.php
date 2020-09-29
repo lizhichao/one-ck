@@ -261,11 +261,13 @@ class Types
         if (self::isDatetime64($type)) {
             return 'uint64';
         }
+        $is_arr = false;
         while (self::isArray($type)) {
             $this->arr_dp[] = 'array';
             $type           = substr($type, 6, -1);
+            $is_arr         = true;
         }
-        if (isset($this->arr_dp[0])) {
+        if ($is_arr) {
             $this->arr_type = $type;
             return $this->alias($this->arr_type);
         }
@@ -463,7 +465,7 @@ class Types
 
     protected function unFormat($type)
     {
-        if (isset($this->base_types[$type]) || $type === 'string' || $type === 'uuid' || self::isFixedString($type)) {
+        if (isset($this->base_types[$type]) || $type === 'string' || $type === 'uuid' || self::isFixedString($type) || $type === 'nothing') {
             return 1;
         }
 
@@ -482,6 +484,7 @@ class Types
             }
         ];
 
+        $fn = null;
         if (isset($call[$type])) {
             $fn = $call[$type];
         } else if (self::isDecimal($type)) {
@@ -500,7 +503,9 @@ class Types
             $fn = function ($v) {
                 return date('Y-m-d H:i:s', substr($v, 0, 10)) . '.' . substr($v, 10);
             };
-        } else {
+        }
+
+        if ($fn === null) {
             return 1;
         }
 
