@@ -177,6 +177,45 @@ $data['select t6 ip64'] = $ck->query("select id,f23,f25 from t6 where f25='" . T
 $data['nothing'] = $ck->query('select array()');
 
 
+$data['drop table']   = $ck->query('DROP TABLE IF EXISTS t5');
+$table                = [
+    'CREATE TABLE t5 (',
+    '`id` UInt32,',
+    '`f1` UInt16,',
+    '`f2` SimpleAggregateFunction(max, DateTime64)',
+    ') ENGINE = AggregatingMergeTree() ORDER BY (id, f1) SETTINGS index_granularity = 8192'
+];
+$data['create table'] = $ck->query(implode("\n", $table));
+
+$data['insert data'] = $ck->insert('t5', [
+    [
+        'id' => 1,
+        'f1' => 1,
+        'f2' => '2020-09-29 14:25:12.258'
+    ],
+    [
+        'id' => 1,
+        'f1' => 1,
+        'f2' => '2020-09-29 14:30:56.873'
+    ],
+    [
+        'id' => 1,
+        'f1' => 1,
+        'f2' => '2020-09-29 14:35:46.456'
+    ],
+    [
+        'id' => 1,
+        'f1' => 1,
+        'f2' => '2020-09-29 14:40:16.387'
+    ],
+    [
+        'id' => 1,
+        'f1' => 1,
+        'f2' => '2020-09-29 14:45:22.111'
+    ]
+]);
+
+$data['select t5 saf'] = $ck->query("select id,f1,max(f2) from t5 group by id, f1");
 
 // flow of  write
 $data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
