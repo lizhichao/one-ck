@@ -229,7 +229,7 @@ class Types
     protected function getTypeFromSimpleAggregateFunction(&$type)
     {
         if (self::isSimpleAggregateFunction($type)) {
-            $type = trim(strstr($type, ','), ' ,)');
+            $type = substr(trim(strstr($type, ','), ' ,'),0,-1);
         }
 
         return $type;
