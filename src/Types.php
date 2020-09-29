@@ -480,6 +480,7 @@ class Types
 
     protected function unFormat($type)
     {
+        $type = $this->getTypeFromSimpleAggregateFunction($type);
         if (isset($this->base_types[$type]) || $type === 'string' || $type === 'uuid' || self::isFixedString($type) || $type === 'nothing') {
             return 1;
         }
