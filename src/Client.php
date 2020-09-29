@@ -46,7 +46,7 @@ class Client
         if (!$this->conn) {
             throw new CkException($msg, $code);
         }
-        stream_set_timeout($this->conn, $time_out);
+        stream_set_timeout($this->conn, $time_out * 10);
         $this->write = new Write($this->conn);
         $this->read  = new Read($this->conn);
         $this->types = new Types($this->write, $this->read);
