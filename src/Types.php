@@ -226,7 +226,7 @@ class Types
         return strpos($str, 'simpleaggregatefunction(') === 0;
     }
 
-    protected function getTypeFromSimpleAggregateFunction($type)
+    protected function getTypeFromSimpleAggregateFunction(&$type)
     {
         if (self::isSimpleAggregateFunction($type)) {
             $type = trim(strstr($type, ','), ' ,)');

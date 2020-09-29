@@ -182,7 +182,7 @@ $table                = [
     'CREATE TABLE t5 (',
     '`id` UInt32,',
     '`f1` UInt16,',
-    '`f2` SimpleAggregateFunction(sum, UInt16)',
+    '`f2` SimpleAggregateFunction(max, DateTime64)',
     ') ENGINE = AggregatingMergeTree() ORDER BY id, f1 SETTINGS index_granularity = 8192'
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
@@ -191,21 +191,21 @@ $data['insert data'] = $ck->insert('t5', [
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => 1
+        'f2' => '2020-09-29 14:25:12.258'
     ],
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => 10
+        'f2' => '2020-09-29 14:30:12.258'
     ],
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => 15
+        'f2' => '2020-09-29 14:35:12.258'
     ],
 ]);
 
-$data['select t5 saf'] = $ck->query("select id,f1,sum(f2) from t5 group by id, f1");
+$data['select t5 saf'] = $ck->query("select id,f1,max(f2) from t5 group by id, f1");
 
 // flow of  write
 $data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
