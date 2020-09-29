@@ -229,11 +229,7 @@ class Types
     protected function getTypeFromSimpleAggregateFunction($type)
     {
         if (self::isSimpleAggregateFunction($type)) {
-            preg_match('/\((.*?)\,\s?(.*)\)/', $type, $matches);
-            if (empty($matches)) {
-                return $type;
-            }
-            $type = trim(end($matches));
+            $type = trim(strstr($type, ','), ' ,)');
         }
 
         return $type;
