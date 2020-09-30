@@ -5,11 +5,11 @@ require __DIR__ . '/vendor/autoload.php';
 use OneCk\Client;
 use OneCk\Types;
 
-//default
-//$ck = new Client('tcp://127.0.0.1:9000', 'default', '', 'default');
 
 $t1 = microtime(true);
-$ck = new Client('tcp://192.168.31.216:9091', 'default', '123456', 'test1');
+$ck = new Client('tcp://127.0.0.1:9000');
+//$ck = new Client('tcp://192.168.31.216:9091', 'default', '123456', 'test1');
+
 
 $data['server info']  = $ck->getServerInfo();
 $data['drop table']   = $ck->query('DROP TABLE IF EXISTS t6');

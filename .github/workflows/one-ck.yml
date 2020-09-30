@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  laravel-tests:
+  tests:
 
     runs-on: ubuntu-latest
 
@@ -15,11 +15,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: php -v
       run: php -v
+    - name: install clickhouse
+      run: docker run -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 -d --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-    - name: install clickhouse
-      run: docker run -d -p 127.0.0.1:9000:9000 --name test-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:latest
-    - name: clickhouse start
-      run: docker logs test-clickhouse-server
-    - name: Execute tests (Unit and Feature tests) via PHPUnit
+    - name: Execute tests
       run: php test.php
