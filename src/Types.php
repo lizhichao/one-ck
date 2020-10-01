@@ -228,6 +228,7 @@ class Types
 
     protected function alias(&$tp)
     {
+        $type = $tp;
         if (isset($this->base_types[$type]) || $type === 'string' || self::isFixedString($type)) {
             return $type;
         }
