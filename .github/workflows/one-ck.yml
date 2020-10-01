@@ -36,6 +36,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
+          ini-values: opcache.jit_buffer_size=256M, opcache.jit=1205, pcre.jit=1
       - name: Check PHP Version
         run: php -v
       - name: install clickhouse
