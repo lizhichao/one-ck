@@ -229,7 +229,7 @@ $table                = [
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
 $ck->writeStart('t7',['id','f2','f5','f15']);
-for ($i = 0; $i < 100; $i++) {
+for ($i = 0; $i < 1000; $i++) {
     $da = [];
     for ($j = 0; $j < 1000; $j++) {
         $da[] = [
@@ -244,6 +244,6 @@ for ($i = 0; $i < 100; $i++) {
 
 $ck->writeEnd();
 
-$data['write 10w rows time'] = microtime(true) - $t1;
+$data['write 100w rows time'] = microtime(true) - $t1;
 
 echo json_encode($data);
