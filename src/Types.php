@@ -226,18 +226,8 @@ class Types
         return strpos($str, 'simpleaggregatefunction(') === 0;
     }
 
-    protected function getTypeFromSimpleAggregateFunction(&$type)
-    {
-        if (self::isSimpleAggregateFunction($type)) {
-            $type = substr(trim(strstr($type, ','), ' ,'),0,-1);
-        }
-
-        return $type;
-    }
-
     protected function alias(&$tp)
     {
-        $type = $this->getTypeFromSimpleAggregateFunction($tp);
         if (isset($this->base_types[$type]) || $type === 'string' || self::isFixedString($type)) {
             return $type;
         }
@@ -273,6 +263,11 @@ class Types
         }
         if (self::isDatetime64($type)) {
             return 'uint64';
+        }
+        if (self::isSimpleAggregateFunction($type)) {
+            $tp   = substr(trim(strstr($type, ','), ' ,'),0,-1);
+            $type = $tp;
+            return $this->alias($type);
         }
         $is_arr = false;
         while (self::isArray($type)) {
@@ -478,7 +473,6 @@ class Types
 
     protected function unFormat($type)
     {
-        $type = $this->getTypeFromSimpleAggregateFunction($type);
         if (isset($this->base_types[$type]) || $type === 'string' || $type === 'uuid' || self::isFixedString($type) || $type === 'nothing') {
             return 1;
         }
