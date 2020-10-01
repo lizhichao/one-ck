@@ -38,7 +38,7 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           ini-values: opcache.jit_buffer_size=256M, opcache.jit=1205, pcre.jit=1
       - name: Check PHP Version
-        run: php -v
+        run: php -v && php -i | grep opcache
       - name: install clickhouse
         run: docker run -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 -d --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
       - name: Install Dependencies
