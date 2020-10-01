@@ -9,12 +9,6 @@ class Read
      */
     private $conn;
 
-    private $buf = '';
-
-    private $i = 0;
-
-    private $len = 0;
-
     public function __construct($conn)
     {
         $this->conn = $conn;

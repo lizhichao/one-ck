@@ -22,7 +22,7 @@ class Types
     protected $arr_dp   = [];
     protected $arr_type = '';
 
-    protected $base_types = [
+    const BASE_TYPE = [
         'int8'    => ['c', 1],
         'uint8'   => ['C', 1],
         'int16'   => ['s', 2],
@@ -32,9 +32,20 @@ class Types
         'int64'   => ['q', 8],
         'uint64'  => ['Q', 8],
         'float32' => ['f', 4],
-        'float64' => ['d', 8],
+        'float64' => ['d', 8]
     ];
 
+    const ALIAS_TYPES = [
+        'decimal32' => 'float32',
+        'decimal64' => 'float64',
+        'date'      => 'uint16',
+        'datetime'  => 'uint32',
+        'ipv4'      => 'uint32',
+        'ipv6'      => 'fixedstring(16)',
+        'enum8'     => 'int8',
+        'enum16'    => 'int16',
+        'nothing'   => 'int8'
+    ];
 
     public function __construct($write, $read)
     {
@@ -226,25 +237,15 @@ class Types
         return strpos($str, 'simpleaggregatefunction(') === 0;
     }
 
+
     protected function alias(&$tp)
     {
         $type = $tp;
-        if (isset($this->base_types[$type]) || $type === 'string' || self::isFixedString($type)) {
+        if (isset(self::BASE_TYPE[$type]) || $type === 'string' || self::isFixedString($type)) {
             return $type;
         }
-        $arr = [
-            'decimal32' => 'float32',
-            'decimal64' => 'float64',
-            'date'      => 'uint16',
-            'datetime'  => 'uint32',
-            'ipv4'      => 'uint32',
-            'ipv6'      => 'fixedstring(16)',
-            'enum8'     => 'int8',
-            'enum16'    => 'int16',
-            'nothing'   => 'int8'
-        ];
-        if (isset($arr[$type])) {
-            return $arr[$type];
+        if (isset(self::ALIAS_TYPES[$type])) {
+            return self::ALIAS_TYPES[$type];
         }
         if (self::isNullable($type)) {
             $this->is_null = true;
@@ -266,7 +267,7 @@ class Types
             return 'uint64';
         }
         if (self::isSimpleAggregateFunction($type)) {
-            $tp   = substr(trim(strstr($type, ','), ' ,'),0,-1);
+            $tp   = substr(trim(strstr($type, ','), ' ,'), 0, -1);
             $type = $tp;
             return $this->alias($type);
         }
@@ -371,7 +372,7 @@ class Types
             throw new CkException('array deep err', CkException::CODE_ARR_ERR);
         }
         array_shift($r);
-        $this->write->addBuf(pack("{$this->base_types['uint64'][0]}*", ...$r));
+        $this->write->addBuf(pack(self::BASE_TYPE['uint64'][0] . '*', ...$r));
         $this->setNull($data);
         $this->format($data, $this->arr_type);
         $this->encode($data, $type, $real_type);
@@ -422,7 +423,7 @@ class Types
      */
     protected function format(&$data, $type)
     {
-        if (isset($this->base_types[$type]) || $type === 'string') {
+        if (isset(self::BASE_TYPE[$type]) || $type === 'string') {
             return 1;
         }
         $call = [
@@ -474,7 +475,7 @@ class Types
 
     protected function unFormat($type)
     {
-        if (isset($this->base_types[$type]) || $type === 'string' || $type === 'uuid' || self::isFixedString($type) || $type === 'nothing') {
+        if (isset(self::BASE_TYPE[$type]) || $type === 'string' || $type === 'uuid' || self::isFixedString($type) || $type === 'nothing') {
             return 1;
         }
 
@@ -538,10 +539,10 @@ class Types
             return 1;
         }
 
-        if (isset($this->base_types[$type])) {
+        if (isset(self::BASE_TYPE[$type])) {
             $this->col_data = array_values(
-                unpack($this->base_types[$type][0] . '*',
-                    $this->read->getChar($this->base_types[$type][1] * $row_count))
+                unpack(self::BASE_TYPE[$type][0] . '*',
+                    $this->read->getChar(self::BASE_TYPE[$type][1] * $row_count))
             );
             return 1;
         }
@@ -581,8 +582,8 @@ class Types
      */
     protected function encode($data, $type, $real_type)
     {
-        if (isset($this->base_types[$real_type])) {
-            $this->write->addBuf(pack("{$this->base_types[$real_type][0]}*", ...$data));
+        if (isset(self::BASE_TYPE[$real_type])) {
+            $this->write->addBuf(pack(self::BASE_TYPE[$real_type][0] . '*', ...$data));
             return 1;
         }
         $fn = null;
