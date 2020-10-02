@@ -6,29 +6,15 @@ on:
   pull_request:
     branches: [ master ]
 
-#jobs:
-#  tests:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: php -v
-#      run: php -v
-#    - name: install clickhouse
-#      run: docker run -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 -d --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
-#    - name: Install Dependencies
-#      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-#    - name: Execute tests
-#      run: php test.php
-
 
 jobs:
   run:
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        operating-system: [ubuntu-latest]
         php-versions: ['7.2', '7.3', '7.4', '8.0']
-    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+        clickhouse-version: [20.1, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8, 20.9]
+    name: PHP ${{ matrix.php-versions }} - clickhouse ${{ matrix.clickhouse-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,7 +26,7 @@ jobs:
       - name: Check PHP Version
         run: php -v && php -i | grep opcache
       - name: install clickhouse
-        run: docker run -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 -d --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
+        run: docker run -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 -d --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:${{ matrix.clickhouse-version }}
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       - name: Execute tests
