@@ -4,7 +4,7 @@
 
 `composer require lizhichao/one-ck`
 
-> php5.6 - php.7.2 not supported Decimal128
+> php5.6 - php.7.2 not supported Decimal128 ，Use a version less than or equal to 0.1.x
 
 ### Supported types 
 - [x] UInt8, UInt16, UInt32, UInt64, Int8, Int16, Int32, Int64
