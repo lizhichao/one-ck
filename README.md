@@ -25,6 +25,7 @@
 - [ ] Tuple(T)
 - [ ] Enum (can use `LowCardinality` instead)
 
+> clickhouse QQ交流群 970435787
 
 ### Demo
 ```php
