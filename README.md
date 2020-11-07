@@ -5,6 +5,8 @@
 `composer require lizhichao/one-ck`
 
 > php5.6 - php7.1 not supported Decimal128 ，Use a version less than or equal to 0.1.x
+> clickhouse QQ交流群 970435787
+
 
 ### Supported types 
 - [x] UInt8, UInt16, UInt32, UInt64, Int8, Int16, Int32, Int64
@@ -25,7 +27,6 @@
 - [ ] Tuple(T)
 - [ ] Enum (can use `LowCardinality` instead)
 
-> clickhouse QQ交流群 970435787
 
 ### Demo
 ```php
