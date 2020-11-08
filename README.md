@@ -4,7 +4,7 @@
 
 `composer require lizhichao/one-ck`
 
-> php5.6 - php7.1 not supported Decimal128 ，Use a version less than or equal to 0.1.x
+> php5.6 - php7.1 not supported Decimal128 ，Use a version less than or equal to 0.1.x   
 > clickhouse QQ交流群 970435787
 
 
