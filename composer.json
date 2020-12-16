@@ -18,8 +18,7 @@
   "require": {
     "php": ">=7.2",
     "ext-bcmath": "*",
-    "ext-json": "*",
-    "ext-curl": "*"
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": {
