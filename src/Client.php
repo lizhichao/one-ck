@@ -255,6 +255,7 @@ class Client
      */
     public function query($sql)
     {
+        $this->fields = [];
         $this->sendQuery($sql);
         return $this->writeEnd();
     }
@@ -279,6 +280,7 @@ class Client
      */
     public function writeStart($table, $fields)
     {
+        $this->fields = [];
         $table = trim($table);
         $this->sendQuery('INSERT INTO ' . $table . ' (' . implode(',', $fields) . ') VALUES ');
         $this->writeEnd(false);
