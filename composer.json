@@ -17,7 +17,6 @@
   ],
   "require": {
     "php": ">=7.2",
-    "ext-bcmath": "*",
     "ext-json": "*"
   },
   "autoload": {
