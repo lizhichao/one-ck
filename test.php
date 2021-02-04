@@ -8,7 +8,7 @@ use OneCk\Types;
 
 $t1 = microtime(true);
 $ck = new Client('tcp://127.0.0.1:9000');
-//$ck = new Client('tcp://192.168.31.216:9091', 'default', '123456', 'test1');
+//$ck = new \OneCk\Client('tcp://192.168.23.129:9091', 'default', '123456', 'test1');
 
 
 $data['server info']  = $ck->getServerInfo();
@@ -217,8 +217,70 @@ $data['insert data'] = $ck->insert('t5', [
 
 $data['select t5 saf'] = $ck->query("select id,f1,max(f2) from t5 group by id, f1");
 
+
+$data['drop table'] = $ck->query('DROP TABLE IF EXISTS tt1');
+$ck->query("CREATE TABLE IF NOT EXISTS tt1 (
+  some_uuid UUID,
+  entity_id UInt32,
+  parameter_id UInt64,
+  creation_ts SimpleAggregateFunction(max, DateTime64) DEFAULT NOW(),
+  number SimpleAggregateFunction(sum, UInt64) DEFAULT 1
+) engine = AggregatingMergeTree()
+PARTITION BY toYYYYMM(creation_ts)
+ORDER BY (some_uuid, entity_id, parameter_id)");
+
+$ck->insert('tt1', [
+    [
+        'some_uuid'    => 'b957bda7-c368-4f43-bc06-640fc6edc466',
+        'entity_id'    => 4,
+        'parameter_id' => 4,
+        'number'       => 1,
+    ],
+    [
+        'some_uuid'    => 'b957bda7-c368-4f43-bc06-640fc6edc466',
+        'entity_id'    => 4,
+        'parameter_id' => 7,
+        'number'       => 1,
+    ],
+    [
+        'some_uuid'    => 'b957bda7-c368-4f43-bc06-640fc6edc466',
+        'entity_id'    => 5,
+        'parameter_id' => 5,
+        'number'       => 1,
+    ],
+    [
+        'some_uuid'    => 'b957bda7-c368-4f43-bc06-640fc6edc466',
+        'entity_id'    => 6,
+        'parameter_id' => 6,
+        'number'       => 1,
+    ],
+    [
+        'some_uuid'    => 'b957bda7-c368-4f43-bc06-640fc6edc466',
+        'entity_id'    => 5,
+        'parameter_id' => 5,
+        'number'       => 1,
+    ]
+]);
+
+$tmp_data = $ck->query("SELECT
+    entity_id,
+    parameter_id,
+    sumOrNullIf(number, some_uuid NOT IN ('b957bda7-c368-4f43-bc06-640fc6edc466')) AS number_0,
+    maxOrNullIf(creation_ts, some_uuid NOT IN ('b957bda7-c368-4f43-bc06-640fc6edc466')) as creation_ts_0,
+    sumOrNullIf(number, some_uuid NOT IN ('c34b4e9f-690e-4f24-b67c-206242a4287c')) AS number_1,
+    maxOrNullIf(creation_ts, some_uuid NOT IN ('c34b4e9f-690e-4f24-b67c-206242a4287c')) as creation_ts_1
+FROM tt1
+WHERE some_uuid IN ('b957bda7-c368-4f43-bc06-640fc6edc466','c34b4e9f-690e-4f24-b67c-206242a4287c')
+GROUP BY entity_id, parameter_id
+ORDER BY entity_id");
+foreach ($tmp_data as $v) {
+    if ($v['number_1'] == null || $v['creation_ts_1'] == null) {
+        throw new \Exception('test fail line:'.__LINE__);
+    }
+}
+
 // flow of  write
-$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
+$data['drop table']   = $ck->query('DROP TABLE IF EXISTS t7');
 $table                = [
     'CREATE TABLE t7 (',
     '`id` UInt32,',
@@ -228,15 +290,15 @@ $table                = [
     ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
-$ck->writeStart('t7',['id','f2','f5','f15']);
+$ck->writeStart('t7', ['id', 'f2', 'f5', 'f15']);
 for ($i = 0; $i < 1000; $i++) {
     $da = [];
     for ($j = 0; $j < 1000; $j++) {
         $da[] = [
-            'id' => mt_rand(1,1000000),
-            'f2' => mt_rand(-1000000,1000000),
-            'f5' => mt_rand(1,10000),
-            'f15' => md5(mt_rand(1,10000))
+            'id'  => mt_rand(1, 1000000),
+            'f2'  => mt_rand(-1000000, 1000000),
+            'f5'  => mt_rand(1, 10000),
+            'f15' => md5(mt_rand(1, 10000))
         ];
     }
     $ck->writeBlock($da);
