@@ -250,8 +250,7 @@ class Types
         if (self::isNullable($type)) {
             $this->is_null = true;
             $tp            = substr($type, 9, -1);
-            $type          = $tp;
-            return $this->alias($type);
+            return $this->alias($tp);
         }
         if (self::isDecimal($type)) {
             $arr = explode(',', substr($type, 8, -1));
@@ -384,6 +383,7 @@ class Types
 
     protected function getNull($row_count)
     {
+        $this->is_null_data = [];
         if ($this->is_null) {
             for ($i = 0; $i < $row_count; $i++) {
                 $n = $this->read->number();
@@ -391,8 +391,6 @@ class Types
                     $this->is_null_data[$i] = 1;
                 }
             }
-        } else {
-            $this->is_null_data = [];
         }
     }
 
