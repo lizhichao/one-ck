@@ -1,7 +1,6 @@
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-
 use OneCk\Client;
 use OneCk\Types;
 
@@ -11,8 +10,13 @@ $ck = new Client('tcp://127.0.0.1:9000');
 //$ck = new \OneCk\Client('tcp://192.168.23.129:9091', 'default', '123456', 'test1');
 
 
-$data['server info']  = $ck->getServerInfo();
-$data['drop table']   = $ck->query('DROP TABLE IF EXISTS t6');
+$data['server info'] = $ck->getServerInfo();
+$data['drop table']  = $ck->query('DROP TABLE IF EXISTS t6');
+
+$res = $ck->query("SELECT sipHash64(toString('1ace54')) AS result");
+if($res[0]['result'] !== '9525649478782099197'){
+    throw new \Exception('test uint64 fail:' . __LINE__);
+}
 $table                = [
     'CREATE TABLE t6 (',
     '`id` UInt32,',
@@ -89,7 +93,7 @@ $data['insert data'] = $ck->insert('t6', [
         'f3'  => 3,
         'f4'  => 3,
         'f5'  => 3,
-        'f6'  => 3,
+        'f6'  => '9844674407370955161',// uint64  > PHP_INT_MAX
         'f7'  => 3,
         'f8'  => 3,
         'f9'  => 3,
@@ -175,7 +179,6 @@ $data['select t6 ip'] = $ck->query("select id,f23,f25 from t6 where f23=" . Type
 $data['select t6 ip64'] = $ck->query("select id,f23,f25 from t6 where f25='" . Types::encodeIpv6('1030::c9b4:ff12:48aa:1a2b') . "'");
 
 $data['nothing'] = $ck->query('select array()');
-
 
 $data['drop table']   = $ck->query('DROP TABLE IF EXISTS t5');
 $table                = [
@@ -275,7 +278,7 @@ GROUP BY entity_id, parameter_id
 ORDER BY entity_id");
 foreach ($tmp_data as $v) {
     if ($v['number_1'] == null || $v['creation_ts_1'] == null) {
-        throw new \Exception('test fail line:'.__LINE__);
+        throw new \Exception('test fail line:' . __LINE__);
     }
 }
 

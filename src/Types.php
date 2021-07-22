@@ -30,7 +30,7 @@ class Types
         'int32'   => ['l', 4],
         'uint32'  => ['L', 4],
         'int64'   => ['q', 8],
-        'uint64'  => ['Q', 8],
+//        'uint64'  => ['Q', 8],
         'float32' => ['f', 4],
         'float64' => ['d', 8]
     ];
@@ -52,6 +52,7 @@ class Types
         $this->write = $write;
         $this->read  = $read;
     }
+
 
     public static function encodeIpv4($ip)
     {
@@ -138,6 +139,21 @@ class Types
         }
         return $r;
     }
+
+    protected function encodeUint64($str)
+    {
+        $str = "{$str}";
+        return pack('L2', intval(bcmod($str, '4294967296')), intval(bcdiv($str, '4294967296')));
+    }
+
+
+    protected function decodeUint64()
+    {
+        $str = $this->read->getChar(8);
+        $r   = unpack('L*', $str);
+        return bcadd(bcmul($r[2], bcpow(2, 32)), $r[1]);
+    }
+
 
     protected function decodeUuid()
     {
@@ -299,7 +315,7 @@ class Types
                 if ($first) {
                     $arr[] = &$val;
                 }
-                $num = unpack('Q', $this->read->getChar(8))[1];
+                $num = unpack('Q', $this->read->getChar(8))[1]; //array len is uint64 ->  PHP_INT_MAX
                 $val = array_fill(0, $num - $p, []);
                 $p   = $num;
                 foreach ($val as &$v) {
@@ -371,7 +387,7 @@ class Types
             throw new CkException('array deep err', CkException::CODE_ARR_ERR);
         }
         array_shift($r);
-        $this->write->addBuf(pack(self::BASE_TYPE['uint64'][0] . '*', ...$r));
+        $this->write->addBuf(pack('Q' . '*', ...$r)); // array len is uint64 ->  PHP_INT_MAX
         $this->setNull($data);
         $this->format($data, $this->arr_type);
         $this->encode($data, $type, $real_type);
@@ -549,6 +565,10 @@ class Types
             $fn = function () {
                 return $this->read->string();
             };
+        } else if ($type === 'uint64') {
+            $fn = function () {
+                return $this->decodeUint64();
+            };
         } else if (self::isFixedString($type)) {
             $n  = intval(substr($type, 12, -1));
             $fn = function () use ($n) {
@@ -588,6 +608,10 @@ class Types
         if ($real_type === 'string') {
             $fn = function ($v) {
                 $this->write->string($v);
+            };
+        } else if ($real_type === 'uint64') {
+            $fn = function ($v) {
+                $this->write->addBuf($this->encodeUint64($v));
             };
         } else if (self::isFixedString($real_type)) {
             $n  = intval(substr($real_type, 12, -1));
