@@ -1,6 +1,6 @@
-## php tcp client for clickhouse
+## 一个php实现的clickhouse tcp协议客户端 | php tcp client for clickhouse
 
-### install
+### 安装 | install
 
 `composer require lizhichao/one-ck`
 
@@ -8,7 +8,7 @@
 > clickhouse QQ交流群 970435787
 
 
-### Supported types 
+### 支持的数据类型 | Supported types 
 - [x] UInt8, UInt16, UInt32, UInt64, Int8, Int16, Int32, Int64
 - [x] Float32, Float64
 - [x] Decimal(P, S), Decimal32(S), Decimal64(S), Decimal128(S)
@@ -28,7 +28,7 @@
 - [ ] Enum (can use `LowCardinality` instead)
 
 
-### Demo
+### 使用例子 | Demo
 ```php
 use OneCk\Client;
 use OneCk\Types;
