@@ -1,5 +1,10 @@
 ## 一个php实现的clickhouse tcp协议客户端 | php tcp client for clickhouse
 
+- 支持流式写入  Support streaming writing
+- 超高的性能，支持上1000w/s的写入速度 Super high performance, support up to 1000w/s writing speed
+- tcp对服务器对服务器友好，压力小 tcp is server-friendly, with little pressure
+- 零依赖 Zero dependence
+
 ### 安装 | install
 
 `composer require lizhichao/one-ck`
