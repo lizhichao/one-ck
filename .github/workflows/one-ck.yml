@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['7.2', '7.4', '8.0']
-        clickhouse-version: ['20.8', '20.10', '20.12','21.3']
+        php-versions: ['7.2', '7.3', '7.4', '8.0']
+        clickhouse-version: ['20.8','20.9', '20.10','20.11', '20.12','21.3']
     name: PHP ${{ matrix.php-versions }} - clickhouse ${{ matrix.clickhouse-version }}
     steps:
       - name: Checkout
