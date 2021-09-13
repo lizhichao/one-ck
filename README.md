@@ -10,7 +10,7 @@
 `composer require lizhichao/one-ck`
 
 > `php5.6 - php7.1` 不支持 `Decimal128` ，请使用 `0.1.x` 版本   
-> `php7.2 >= ` 推荐使用 `0.2.x`版本
+> `php7.2 >= ` 推荐使用 `0.2.x`版本   
 > clickhouse QQ交流群 970435787
 
 
