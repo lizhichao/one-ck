@@ -54,6 +54,11 @@ class Client
         $this->hello(...$this->conf);
     }
 
+    public function __destruct()
+    {
+        fclose($this->conn);
+    }
+
     private function addClientInfo()
     {
         $this->write->string(self::NAME)->number(self::VERSION_MAJOR, self::VERSION_MINOR, self::VERSION);
