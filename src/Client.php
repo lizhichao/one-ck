@@ -54,8 +54,9 @@ class Client
         $this->hello(...$this->conf);
     }
 
-    public function __destruct()
+    public function closeConnection()
     {
+        stream_socket_shutdown($this->conn, STREAM_SHUT_RDWR);
         fclose($this->conn);
     }
 
