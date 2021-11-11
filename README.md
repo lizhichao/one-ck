@@ -241,6 +241,8 @@ $ck->writeEnd();
 $data['write 10w rows time'] = microtime(true) - $t1;
 
 echo json_encode($data);
+
+$ck->closeConnection();
 ```
 
 ## 我的其他仓库
