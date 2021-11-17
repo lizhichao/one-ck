@@ -41,12 +41,34 @@ class Client
 
     public function __construct($dsn = 'tcp://127.0.0.1:9000', $username = 'default', $password = '', $database = 'default', $options = [])
     {
-        $time_out   = isset($options['time_out']) ? $options['time_out'] : 3;
-        $this->conn = stream_socket_client($dsn, $code, $msg, $time_out);
+        $context = isset($options['tcp_nodelay']) && !empty($options['tcp_nodelay']) ? stream_context_create(
+            ['socket' => ['tcp_nodelay' => true]]
+        ) : null;
+
+        $flags = isset($options['persistent']) && !empty($options['persistent']) ?
+            STREAM_CLIENT_CONNECT | STREAM_CLIENT_PERSISTENT
+            : STREAM_CLIENT_CONNECT;
+
+        $this->conn = $context ? stream_socket_client(
+            $dsn,
+            $code,
+            $msg,
+            $options['connect_timeout'] ?? 3,
+            $flags,
+            $context
+        ) : stream_socket_client(
+            $dsn,
+            $code,
+            $msg,
+            $options['connect_timeout'] ?? 3,
+            $flags
+        );
+
         if (!$this->conn) {
             throw new CkException($msg, $code);
         }
-        stream_set_timeout($this->conn, $time_out * 10);
+
+        stream_set_timeout($this->conn, $options['socket_timeout'] ?? 30);
         $this->write = new Write($this->conn);
         $this->read  = new Read($this->conn);
         $this->types = new Types($this->write, $this->read);
