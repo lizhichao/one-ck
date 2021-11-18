@@ -33,6 +33,35 @@
 - [ ] Tuple(T)
 - [ ] Enum (can use `LowCardinality` instead)
 
+### Array of client options
+
+It is also possible to create the client with configuration options:
+
+```php
+use OneCk\Client;
+
+$client = new Client(
+    'tcp://localhost:9000',
+    'username',
+    'password',
+    'database',
+    [
+        'connect_timeout' => 3,
+        'socket_timeout'  => 30,
+        'tcp_nodelay'     => true,
+        'persistent'      => true,
+    ]
+);
+```
+
+The following options are available:
+
+Name | Type | Default | Description
+--- | :---: | :---: | ---
+*connect_timeout* | float | 3.0 | The number of seconds that the client waits for a connect to a ClickHouse server before throwing a `CkException` exception.
+*socket_timeout* | float | 30.0 | The number of seconds that the client waits for a respond from a ClickHouse server before throwing a `CkException` exception.
+*tcp_nodelay* | boolean | false | Whether the Nagle algorithm is disabled on a TCP connection.
+*persistent* | boolean | false | Whether to use a persistent connection.
 
 ### 使用例子 | Demo
 ```php
@@ -241,6 +270,9 @@ $ck->writeEnd();
 $data['write 10w rows time'] = microtime(true) - $t1;
 
 echo json_encode($data);
+
+//Close connection
+unset($ck);
 ```
 
 ## 我的其他仓库
