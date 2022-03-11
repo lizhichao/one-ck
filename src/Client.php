@@ -78,8 +78,10 @@ class Client
 
     public function __destruct()
     {
-        stream_socket_shutdown($this->conn, STREAM_SHUT_RDWR);
-        fclose($this->conn);
+        if (is_resource($this->conn)) {
+            stream_socket_shutdown($this->conn, STREAM_SHUT_RDWR);
+            fclose($this->conn);
+        }
     }
 
     private function addClientInfo()
