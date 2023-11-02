@@ -31,6 +31,13 @@
 - [x] Array(T)
 - [x] SimpleAggregateFunction(F, T)
 - [ ] Tuple(T)
+- [ ] Int128
+- [ ] Int256
+- [ ] UInt128
+- [ ] UInt256
+- [ ] Decimal256(S)
+- [ ] Bool
+- [ ] JSON
 - [ ] Enum (can use `LowCardinality` instead)
 
 ### Array of client options
