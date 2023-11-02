@@ -27,7 +27,7 @@ jobs:
       - name: Check PHP Version
         run: php -v && php -i | grep opcache
       - name: Install Clickhouse
-        run: docker run -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 -d --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:${{ matrix.clickhouse-version }}
+        run: docker run -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 -d --name some-clickhouse-server --ulimit nofile=262144:262144 clickhouse/clickhouse-server:${{ matrix.clickhouse-version }}
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       - name: Execute tests
