@@ -44,7 +44,8 @@ class Types
         'ipv6'      => 'fixedstring(16)',
         'enum8'     => 'int8',
         'enum16'    => 'int16',
-        'nothing'   => 'int8'
+        'nothing'   => 'int8',
+        'bool'      => 'uint8'
     ];
 
     public function __construct($write, $read)
@@ -452,6 +453,9 @@ class Types
             },
             'ipv6'     => function ($v) {
                 return self::encodeIpv6($v);
+            },
+            'bool'     => function ($v) {
+                return $v ? 1 : 0;
             }
         ];
         $fn   = null;
@@ -498,6 +502,9 @@ class Types
             },
             'ipv6'     => function ($v) {
                 return $this->decodeIpv6($v);
+            },
+            'bool'     => function ($v) {
+                return (bool)$v;
             }
         ];
 

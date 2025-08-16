@@ -49,6 +49,7 @@ $table                = [
     '`f27` Array(Int32),',
     '`f28` Array(Array(Array(Nullable(Date)))),',
     '`f29` Array(Array(Array(Array(Array(Nullable(Datetime))))))',
+    '`f30` Nullable(Bool)',
     ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
@@ -84,7 +85,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f26' => 'eee',
         'f27' => [0, -2, 3, 4, 5, 6, 7, 8, 64],
         'f28' => [[['2020-01-05', null, '2020-01-06']], [['2020-01-07'], ['2020-01-08']], [['2020-01-09']]],
-        'f29' => [[[[["2020-01-05 05:05:05", null, "2020-01-06 15:16:17"]], [["2020-01-07 18:19:20"], ["2020-01-08 21:22:23"]], [["2020-01-09 00:00:00"]]], [[["2020-01-10 01:00:00", null]]]], [[[["2020-01-11 00:00:01", null, "2020-01-12 11:01:58"]], [["2020-01-13 21:22:01"]]]]]
+        'f29' => [[[[["2020-01-05 05:05:05", null, "2020-01-06 15:16:17"]], [["2020-01-07 18:19:20"], ["2020-01-08 21:22:23"], ["2020-01-09 00:00:00"]]], [[["2020-01-10 01:00:00", null]]]], [[[["2020-01-11 00:00:01", null, "2020-01-12 11:01:58"]], [["2020-01-13 21:22:01"]]]]],
+    'f30' => true
     ],
     [
         'id'  => 2,
@@ -116,7 +118,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f26' => 'eee22',
         'f27' => [1, 2, 3, 4],
         'f28' => [[['2020-01-05', '2020-01-06']], [['2020-01-07', null], ['2020-01-08']], [['2020-01-09']]],
-        'f29' => [[[[[null]]]]]
+        'f29' => [[[[[null]]]]],
+    'f30' => false
     ],
     [
         'id'  => 3,
@@ -148,7 +151,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f26' => 'eee22',
         'f27' => [12344],
         'f28' => [[['2020-01-05', '2020-01-06'], [null]], [['2020-01-07'], ['2020-01-08']], [['2020-01-09']]],
-        'f29' => [[[[['2018-01-25 11:25:14']]]]]
+        'f29' => [[[[['2018-01-25 11:25:14']]]]],
+    'f30' => null
     ]
 ]);
 
@@ -157,6 +161,18 @@ $data['insert data'] = $ck->insert('t6', [
 
 
 $data['select t6'] = $ck->query('select * from t6');
+// 验证Nullable(bool)字段读写
+foreach ($data['select t6'] as $row) {
+    if ($row['id'] === '1' && $row['f30'] !== true) {
+        throw new Exception('Nullable(bool) field write/read fail: id=1');
+    }
+    if ($row['id'] === '2' && $row['f30'] !== false) {
+        throw new Exception('Nullable(bool) field write/read fail: id=2');
+    }
+    if ($row['id'] === '3' && $row['f30'] !== null) {
+        throw new Exception('Nullable(bool) field write/read fail: id=3');
+    }
+}
 
 $data['select t6 int64'] = $ck->query("select id,f6 from t6 where f6=1844674407370955161");
 
