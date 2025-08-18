@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         php-versions: ['8.0', '8.1', '8.2']
-        clickhouse-version: ['21.9','21.11','22.1','22.9']
+        clickhouse-version: ['22.1','22.9']
     name: PHP ${{ matrix.php-versions }} - clickhouse ${{ matrix.clickhouse-version }}
     steps:
       - name: Checkout
