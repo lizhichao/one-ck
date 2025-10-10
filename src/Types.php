@@ -100,6 +100,11 @@ class Types
         return $n * 1;
     }
 
+    public static function encodeBool($bool)
+    {
+        return $bool ? 1 : 0;
+    }
+
     public static function encodeUuid($data)
     {
         $s  = str_replace('-', '', $data);
@@ -442,6 +447,9 @@ class Types
             return 1;
         }
         $call = [
+            'bool'     => function ($v) {
+                return self::encodeBool($v);
+            },
             'date'     => function ($v) {
                 return self::encodeDate($v);
             },
@@ -488,6 +496,9 @@ class Types
         }
 
         $call = [
+            'bool'     => function ($v) {
+                return (bool)$v;
+            },
             'date'     => function ($v) {
                 return date('Y-m-d', $v * 86400);
             },
