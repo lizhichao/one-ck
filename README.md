@@ -30,9 +30,9 @@
 - [x] IPv6
 - [x] Array(T)
 - [x] SimpleAggregateFunction(F, T)
+- [x] Bool
 - [ ] Tuple(T)
 - [ ] Int128,Int256,UInt128,UInt256,Decimal256(S)
-- [ ] Bool
 - [ ] JSON
 - [ ] Enum (can use `LowCardinality` instead)
 
